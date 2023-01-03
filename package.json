@@ -1,0 +1,40 @@
+{
+  "name": "@project/monorepo",
+  "version": "1.0.0",
+  "keywords": [
+    "ethereum",
+    "react",
+    "workspaces",
+    "yarn"
+  ],
+  "private": true,
+  "scripts": {
+    "sol:compile": "yarn workspace @project/contracts compile",
+    "sol:test": "yarn workspace @project/contracts test",
+    "sol:typechain": "yarn workspace @project/contracts typechain",
+    "sol:fork": "yarn workspace @project/contracts fork",
+    "sol:local": "yarn workspace @project/contracts local",
+    "sol:deploy:local": "yarn workspace @project/contracts deploy:local",
+    "next:build": "yarn workspace @project/react-app build",
+    "next:start": "yarn workspace @project/react-app start",
+    "next:dev": "yarn workspace @project/react-app dev"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "resolutions": {
+    "@openzeppelin/contracts": "4.8.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "7.31.0",
+    "eslint-config-next": "11.0.1",
+    "eslint-config-prettier": "^6.12.0",
+    "prettier": "2.5.0",
+    "shelljs": "^0.8.4",
+    "typescript": "4.3.5"
+  }
+}

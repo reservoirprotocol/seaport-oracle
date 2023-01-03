@@ -1,0 +1,2 @@
+export const MAX_BLOCKS_VALITIDY = 10;
+export const MAX_RETURNED_CANCELLATIONS = 500;

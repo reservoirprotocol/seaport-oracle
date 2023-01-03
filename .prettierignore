@@ -1,0 +1,16 @@
+# folders
+artifacts/
+build/
+cache/
+coverage/
+dist/
+lib/
+node_modules/
+typechain/
+
+# files
+coverage.json
+.history/
+.next/
+typechain/
+deployments/
