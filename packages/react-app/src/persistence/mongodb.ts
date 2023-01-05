@@ -1,8 +1,8 @@
 import { Db, MongoClient, MongoClientOptions } from "mongodb";
 import { OrderCancellation } from "../types/types";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const MONGODB_DB = process.env.DB_NAME;
+const MONGODB_URI = process.env.MONGO_URL;
+const MONGODB_DB = process.env.DB_NAME ?? "cancelx";
 
 // check the MongoDB URI
 if (!MONGODB_URI) {
