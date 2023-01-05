@@ -10,5 +10,5 @@ export const createLogger = (service: string) =>
       format.json(),
     ),
     defaultMeta: { endpoint: service },
-    transports: [new winston.transports.File({ filename: "combined.log" })],
+    transports: [new winston.transports.Console()],
   });
