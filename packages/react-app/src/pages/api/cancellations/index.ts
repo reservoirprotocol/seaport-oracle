@@ -3,7 +3,7 @@ import { isEmpty } from "lodash";
 import { NextApiRequest, NextApiResponse } from "next";
 import { chainId } from "../../../eth";
 import { findCancellations, insertCancellation } from "../../../persistence/mongodb";
-import { getOrders } from "../../../reservoir";
+import { HashingError, hashOrders } from "../../../seaport";
 import { CANCEL_REQUEST_EIP712_TYPE, EIP712_DOMAIN } from "../../../types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../../utils/constants";
 import { createLogger } from "../../../utils/logger";
@@ -35,48 +35,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   async function handlePost() {
-    const { orderHashes, signature } = ORDER_CANCELLATION_REQUEST.parse(req.body);
-    const orders = await getOrders(orderHashes);
+    const data = ORDER_CANCELLATION_REQUEST.parse(req.body);
+    const orders = data.orders;
     if (isEmpty(orders)) {
       LOGGER.info("No order found");
       res.status(400).end();
       return;
     }
-    let orderSigner;
-    for (let i = 0; i < orders.length; i++) {
-      const order = orders[i];
-      try {
-        await order.checkSignature();
-      } catch (e) {
-        LOGGER.info("Wrong Order Signature");
-        res.status(400).end();
-        return;
-      }
 
-      if (!orderSigner) {
-        orderSigner = order.params.offerer;
-      } else if (order.params.offerer != orderSigner) {
-        LOGGER.info(`Inconsistent order signers found: ${order.params.offerer} | ${orderSigner}`);
-        res.status(401).end();
-        return;
-      }
+    const [orderHashes, orderSigner, error] = await hashOrders(orders);
 
-      if (!orderHashes.includes(order.hash())) {
-        LOGGER.info(`Orders hash mismatch`);
-        res.status(401).end();
-        return;
-      }
+    if (error != HashingError.NONE) {
+      res.status(400).end();
+      return;
     }
-    LOGGER.info(`Validating signature for orderHashes: ${orderHashes}`);
+
+    LOGGER.info(`orderHashes: ${JSON.stringify(orderHashes)}`);
+    LOGGER.info(`orderSigner: ${orderSigner}`);
+
     const cancelRequestSigner = verifyTypedData(
       EIP712_DOMAIN(chainId),
       CANCEL_REQUEST_EIP712_TYPE,
       { orderHashes },
-      signature,
+      data.signature,
     );
 
+    LOGGER.info(`cancelRequestSigner: ${cancelRequestSigner}`);
+
     if (cancelRequestSigner.toUpperCase() != orderSigner?.toUpperCase()) {
-      LOGGER.info(`Cancel signer: ${cancelRequestSigner} is not Order signer: ${orderSigner}`);
+      LOGGER.info(`Cancel signer:${cancelRequestSigner} is not order signer: ${orderSigner}`);
       res.status(401).end();
       return;
     } else {

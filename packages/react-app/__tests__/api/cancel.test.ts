@@ -1,11 +1,11 @@
 import { generateMock } from "@anatine/zod-mock";
 import * as Sdk from "@reservoir0x/sdk";
+import { OrderComponents } from "@reservoir0x/sdk/dist/seaport/types";
 import { Wallet } from "ethers";
 import { when } from "jest-when";
 import { createMocks } from "node-mocks-http";
 import handler from "../../src/pages/api/cancellations";
 import * as mongo from "../../src/persistence/mongodb";
-import * as reservoir from "../../src/reservoir/";
 import { CANCEL_REQUEST_EIP712_TYPE, EIP712_DOMAIN } from "../../src/types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../src/utils/constants";
 import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
@@ -16,11 +16,6 @@ jest.mock("../../src/persistence/mongodb", () => ({
   insertCancellation: jest.fn(),
 }));
 
-jest.mock("../../src/reservoir/", () => ({
-  getOrders: jest.fn(),
-}));
-
-const mockedGetOrders = reservoir.getOrders as unknown as jest.Mock<typeof reservoir.getOrders>;
 const mockedFindCancellations = mongo.findCancellations as unknown as jest.Mock<typeof mongo.findCancellations>;
 const mockedIsCancelled = mongo.isCancelled as unknown as jest.Mock<typeof mongo.isCancelled>;
 const mockedInsertCancellation = mongo.insertCancellation as unknown as jest.Mock<typeof mongo.insertCancellation>;
@@ -30,7 +25,6 @@ describe("Cancellation API", () => {
   const user1 = Wallet.createRandom();
   const user2 = Wallet.createRandom();
   afterEach(() => {
-    mockedGetOrders.mockRestore();
     mockedFindCancellations.mockRestore();
     mockedIsCancelled.mockRestore();
     mockedInsertCancellation.mockRestore();
@@ -48,7 +42,7 @@ describe("Cancellation API", () => {
       });
 
       it("cancels order if owner requests it", async () => {
-        const { orderHashes } = await mockReservoir(user1, 1);
+        const [orders, orderHashes] = await mockOrders(user1, 1);
 
         const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
           orderHashes,
@@ -56,7 +50,7 @@ describe("Cancellation API", () => {
 
         const { req, res } = createMocks({
           method: "POST",
-          body: { signature, orderHashes },
+          body: { signature, orders },
         });
 
         await handler(req, res);
@@ -70,7 +64,7 @@ describe("Cancellation API", () => {
       });
 
       it("cancels multiple orders if owner requests it", async () => {
-        const { orderHashes } = await mockReservoir(user1, 10);
+        const [orders, orderHashes] = await mockOrders(user1, 10);
 
         const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
           orderHashes,
@@ -78,7 +72,7 @@ describe("Cancellation API", () => {
 
         const { req, res } = createMocks({
           method: "POST",
-          body: { signature, orderHashes },
+          body: { signature, orders },
         });
 
         await handler(req, res);
@@ -87,7 +81,7 @@ describe("Cancellation API", () => {
       });
 
       it("return 401 if non owner requests cancellation", async () => {
-        const { orderHashes } = await mockReservoir(user1, 1);
+        const [orders, orderHashes] = await mockOrders(user1, 1);
 
         const signature = await user2._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
           orderHashes,
@@ -95,7 +89,7 @@ describe("Cancellation API", () => {
 
         const { req, res } = createMocks({
           method: "POST",
-          body: { signature, orderHashes },
+          body: { signature, orders },
         });
 
         await handler(req, res);
@@ -103,7 +97,7 @@ describe("Cancellation API", () => {
       });
 
       it("return 401 if non owner requests multiple cancellation", async () => {
-        const orders: Sdk.Seaport.Order[] = [];
+        const orders = [];
         const orderHashes: string[] = [];
         let orderData = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData.offerer = user1.address;
@@ -111,19 +105,14 @@ describe("Cancellation API", () => {
         await order.sign(user1);
         let orderHash = await order.hash();
         orderHashes.push(orderHash);
-        orders.push(order);
+        orders.push(order.params);
         orderData = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData.offerer = user2.address;
         order = new Sdk.Seaport.Order(chainId, orderData);
         await order.sign(user2);
         orderHash = await order.hash();
         orderHashes.push(orderHash);
-        orders.push(order);
-        //@ts-ignore
-        when(mockedGetOrders)
-          .calledWith(orderHashes)
-          //@ts-ignore
-          .mockReturnValue(orders);
+        orders.push(order.params);
 
         const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
           orderHashes,
@@ -131,11 +120,11 @@ describe("Cancellation API", () => {
 
         const { req, res } = createMocks({
           method: "POST",
-          body: { signature, orderHashes },
+          body: { signature, orders },
         });
 
         await handler(req, res);
-        expect(res._getStatusCode()).toBe(401);
+        expect(res._getStatusCode()).toBe(400);
       });
     });
 
@@ -181,24 +170,19 @@ describe("Cancellation API", () => {
   });
 });
 
-async function mockReservoir(user1: Wallet, numberOfOrders: number) {
-  const orders: Sdk.Seaport.Order[] = [];
+async function mockOrders(user: Wallet, numberOfOrders: number): Promise<[OrderComponents[], string[]]> {
+  const orders: OrderComponents[] = [];
   const orderHashes: string[] = [];
 
   for (let i = 0; i < numberOfOrders; i++) {
     const orderData = generateMock(SEAPORT_ORDER_SCHEMA);
-    orderData.offerer = user1.address;
+    orderData.offerer = user.address;
     const order = new Sdk.Seaport.Order(chainId, orderData);
-    await order.sign(user1);
+    await order.sign(user);
     const orderHash = await order.hash();
     orderHashes.push(orderHash);
-    orders.push(order);
+    orders.push(order.params);
   }
 
-  //@ts-ignore
-  when(mockedGetOrders)
-    .calledWith(orderHashes)
-    //@ts-ignore
-    .mockReturnValue(orders);
-  return { orderHashes };
+  return [orders, orderHashes];
 }

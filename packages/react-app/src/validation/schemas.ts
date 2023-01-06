@@ -44,5 +44,5 @@ export const SEAPORT_ORDER_SCHEMA = z.object({
 
 export const ORDER_CANCELLATION_REQUEST = z.object({
   signature: z.string(),
-  orderHashes: z.array(bytes32).nonempty(),
+  orders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
 });

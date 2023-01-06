@@ -1,6 +1,6 @@
 import { defaultAbiCoder } from "ethers/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";
-import { chainId, provider, wallet } from "../../../eth";
+import { chainId, latestBlock, wallet } from "../../../eth";
 import { isCancelled } from "../../../persistence/mongodb";
 import { EIP712_DOMAIN, ORDER_VALIDITY_EIP712_TYPE, SignedOrder } from "../../../types/types";
 import { MAX_BLOCKS_VALITIDY } from "../../../utils/constants";
@@ -15,13 +15,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(400).end();
       return;
     }
-    const blockNumber = await provider.getBlockNumber();
+
     if (await isCancelled(orderHash.toString())) {
       res.status(409).end();
       return;
     }
-    LOGGER.info(`Signed order hash: ${orderHash} at block: ${blockNumber}`);
+
+    const blockNumber = await latestBlock();
     const blockDeadline = blockNumber + MAX_BLOCKS_VALITIDY;
+
     const signature = await wallet._signTypedData(EIP712_DOMAIN(chainId), ORDER_VALIDITY_EIP712_TYPE, {
       blockDeadline,
       orderHash,
@@ -31,6 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       ["tuple(uint256, bytes32)", "bytes"],
       [[blockDeadline, orderHash], signature],
     );
+
+    LOGGER.info(`Signed order hash: ${orderHash} at block: ${blockNumber}`);
 
     res.status(200).json({ extraData, orderHash: orderHash.toString(), blockDeadline, blockNumber });
   } catch (e) {
