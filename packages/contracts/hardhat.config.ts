@@ -124,7 +124,7 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0,
     },
-    signer: { default: 0 },
+    signer: { default: 0, 5: "0xfbCC3974d468A245aC0BFCf421Cdf22E43232F9A" },
   },
   mocha: {
     timeout: 30000,
