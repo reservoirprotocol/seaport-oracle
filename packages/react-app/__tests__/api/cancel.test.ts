@@ -4,11 +4,17 @@ import { OrderComponents } from "@reservoir0x/sdk/dist/seaport/types";
 import { Wallet } from "ethers";
 import { when } from "jest-when";
 import { createMocks } from "node-mocks-http";
+import { chainId } from "../../src/eth";
 import handler from "../../src/pages/api/cancellations";
 import * as mongo from "../../src/persistence/mongodb";
 import { CANCEL_REQUEST_EIP712_TYPE, EIP712_DOMAIN } from "../../src/types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../src/utils/constants";
+import * as time from "../../src/utils/time";
 import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
+
+jest.mock("../../src/utils/time", () => ({
+  getTimestamp: jest.fn(),
+}));
 
 jest.mock("../../src/persistence/mongodb", () => ({
   findCancellations: jest.fn(),
@@ -16,15 +22,23 @@ jest.mock("../../src/persistence/mongodb", () => ({
   insertCancellation: jest.fn(),
 }));
 
+const mockedGetTimestamp = time.getTimestamp as unknown as jest.Mock<typeof time.getTimestamp>;
 const mockedFindCancellations = mongo.findCancellations as unknown as jest.Mock<typeof mongo.findCancellations>;
 const mockedIsCancelled = mongo.isCancelled as unknown as jest.Mock<typeof mongo.isCancelled>;
 const mockedInsertCancellation = mongo.insertCancellation as unknown as jest.Mock<typeof mongo.insertCancellation>;
-const chainId = parseFloat(process.env.NEXT_PUBLIC_CHAIN_ID ?? "1");
 
 describe("Cancellation API", () => {
   const user1 = Wallet.createRandom();
   const user2 = Wallet.createRandom();
+
+  beforeEach(() => {
+    when(mockedGetTimestamp)
+      //@ts-ignore
+      .mockReturnValue(1);
+  });
+
   afterEach(() => {
+    mockedGetTimestamp.mockRestore();
     mockedFindCancellations.mockRestore();
     mockedIsCancelled.mockRestore();
     mockedInsertCancellation.mockRestore();
@@ -39,6 +53,23 @@ describe("Cancellation API", () => {
 
         await handler(req, res);
         expect(res._getStatusCode()).toBe(501);
+      });
+
+      it("returns 400 with empty orders", async () => {
+        const orders: OrderComponents[] = [];
+        const orderHashes: string[] = [];
+
+        const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
+          orderHashes,
+        });
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { signature, orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(400);
       });
 
       it("cancels order if owner requests it", async () => {
@@ -59,7 +90,7 @@ describe("Cancellation API", () => {
         expect(mockedInsertCancellation).toHaveBeenCalledWith({
           orderHash,
           owner: user1.address,
-          timestamp: new Date().getTime(),
+          timestamp: 1,
         });
       });
 
@@ -96,7 +127,7 @@ describe("Cancellation API", () => {
         expect(res._getStatusCode()).toBe(401);
       });
 
-      it("return 401 if non owner requests multiple cancellation", async () => {
+      it("return 400 if non owner requests multiple cancellation", async () => {
         const orders = [];
         const orderHashes: string[] = [];
         let orderData = generateMock(SEAPORT_ORDER_SCHEMA);

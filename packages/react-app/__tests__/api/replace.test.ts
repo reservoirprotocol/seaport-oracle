@@ -1,0 +1,190 @@
+import { generateMock } from "@anatine/zod-mock";
+import * as Sdk from "@reservoir0x/sdk";
+import { OrderComponents } from "@reservoir0x/sdk/dist/seaport/types";
+import { Wallet } from "ethers";
+import { when } from "jest-when";
+import { createMocks } from "node-mocks-http";
+import { chainId } from "../../src/eth";
+import handler from "../../src/pages/api/replacements";
+import * as mongo from "../../src/persistence/mongodb";
+import * as time from "../../src/utils/time";
+import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
+
+jest.mock("../../src/utils/time", () => ({
+  getTimestamp: jest.fn(),
+}));
+
+jest.mock("../../src/persistence/mongodb", () => ({
+  findCancellations: jest.fn(),
+  isCancelled: jest.fn(),
+  insertCancellation: jest.fn(),
+}));
+
+const mockedGetTimestamp = time.getTimestamp as unknown as jest.Mock<typeof time.getTimestamp>;
+const mockedFindCancellations = mongo.findCancellations as unknown as jest.Mock<typeof mongo.findCancellations>;
+const mockedIsCancelled = mongo.isCancelled as unknown as jest.Mock<typeof mongo.isCancelled>;
+const mockedInsertCancellation = mongo.insertCancellation as unknown as jest.Mock<typeof mongo.insertCancellation>;
+
+describe("Replacement API", () => {
+  const user1 = Wallet.createRandom();
+  const user2 = Wallet.createRandom();
+
+  beforeEach(() => {
+    when(mockedGetTimestamp)
+      //@ts-ignore
+      .mockReturnValue(1);
+  });
+  afterEach(() => {
+    mockedGetTimestamp.mockRestore();
+    mockedFindCancellations.mockRestore();
+    mockedIsCancelled.mockRestore();
+    mockedInsertCancellation.mockRestore();
+  });
+
+  describe("/api/replacements", () => {
+    describe("POST", () => {
+      it("patch collection returns 501", async () => {
+        const { req, res } = createMocks({
+          method: "PATCH",
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(501);
+      });
+
+      it("gets collection returns 501", async () => {
+        const { req, res } = createMocks({
+          method: "GET",
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(501);
+      });
+
+      it("returns 400 with empty orders", async () => {
+        const orders: OrderComponents[] = [];
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(400);
+      });
+
+      it("replaces order if owner requests it", async () => {
+        const idToCancel = "666";
+        const orders = await mockOrders(user1, [idToCancel]);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(200);
+        expect(mockedInsertCancellation).toHaveBeenCalledWith({
+          orderHash: idToCancel,
+          owner: user1.address,
+          timestamp: 1,
+        });
+      });
+
+      it("cancels multiple orders if owner requests it", async () => {
+        const idsToCancel = ["1", "2", "3", "4", "5"];
+        const orders = await mockOrders(user1, idsToCancel);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(200);
+        expect(mockedInsertCancellation).toHaveBeenNthCalledWith(1, {
+          orderHash: idsToCancel[0],
+          owner: user1.address,
+          timestamp: 1,
+        });
+        expect(mockedInsertCancellation).toHaveBeenNthCalledWith(2, {
+          orderHash: idsToCancel[1],
+          owner: user1.address,
+          timestamp: 1,
+        });
+        expect(mockedInsertCancellation).toHaveBeenNthCalledWith(3, {
+          orderHash: idsToCancel[2],
+          owner: user1.address,
+          timestamp: 1,
+        });
+        expect(mockedInsertCancellation).toHaveBeenNthCalledWith(4, {
+          orderHash: idsToCancel[3],
+          owner: user1.address,
+          timestamp: 1,
+        });
+        expect(mockedInsertCancellation).toHaveBeenNthCalledWith(5, {
+          orderHash: idsToCancel[4],
+          owner: user1.address,
+          timestamp: 1,
+        });
+      });
+
+      it("return 400 if salt missing", async () => {
+        const orders = [];
+        let orderData = generateMock(SEAPORT_ORDER_SCHEMA);
+        orderData.offerer = user1.address;
+        orderData.salt = "0";
+        let order = new Sdk.Seaport.Order(chainId, orderData);
+        await order.sign(user1);
+        orders.push(order.params);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(400);
+      });
+
+      it("return 400 if inconsistent offerers", async () => {
+        const orders = [];
+        let orderData = generateMock(SEAPORT_ORDER_SCHEMA);
+        orderData.offerer = user1.address;
+        let order = new Sdk.Seaport.Order(chainId, orderData);
+        await order.sign(user1);
+        orders.push(order.params);
+        let orderData2 = generateMock(SEAPORT_ORDER_SCHEMA);
+        orderData2.offerer = user1.address;
+        let order2 = new Sdk.Seaport.Order(chainId, orderData2);
+        await order2.sign(user2);
+        orders.push(order2.params);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(400);
+      });
+    });
+  });
+});
+
+async function mockOrders(user: Wallet, salts: string[]): Promise<OrderComponents[]> {
+  const orders: OrderComponents[] = [];
+
+  for (let i = 0; i < salts.length; i++) {
+    const orderData = generateMock(SEAPORT_ORDER_SCHEMA);
+    orderData.offerer = user.address;
+    if (salts[i]) {
+      orderData.salt = salts[i];
+    }
+    const order = new Sdk.Seaport.Order(chainId, orderData);
+    await order.sign(user);
+    orders.push(order.params);
+  }
+
+  return orders;
+}
