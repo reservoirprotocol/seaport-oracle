@@ -35,12 +35,17 @@ export async function hashOrders(orders: SeaPortOrder[]): Promise<[string[], str
   return [orderHashes, orderSigner!, ValidationError.NONE];
 }
 
-export async function getOrdersSalt(orders: SeaPortOrder[]): Promise<[string[], string, ValidationError]> {
+export async function getReplacedOrderHashes(
+  replacedOrdersByHash: Map<string, SeaPortOrder>,
+  newOrders: SeaPortOrder[],
+): Promise<[string[], string, ValidationError]> {
   let orderSigner: string = "";
   const salts = [];
-  for (let i = 0; i < orders.length; i++) {
-    const orderData = orders[i];
+
+  for (let i = 0; i < newOrders.length; i++) {
+    const orderData = newOrders[i];
     const order = new Sdk.Seaport.Order(chainId, orderData);
+
     try {
       await order.checkSignature();
     } catch (e) {
@@ -52,8 +57,15 @@ export async function getOrdersSalt(orders: SeaPortOrder[]): Promise<[string[], 
     } else if (order.params.offerer != orderSigner) {
       return [[], "", ValidationError.SIGNER_MISMATCH];
     }
+
     if (BigNumber.from(order.params.salt).isZero()) {
       return [[], "", ValidationError.SALT_MISSING];
+    }
+
+    const replacedOrder = replacedOrdersByHash.get(order.params.salt);
+
+    if (!replacedOrder || replacedOrder.offerer != orderSigner) {
+      return [[], "", ValidationError.SIGNER_MISMATCH];
     }
     salts.push(order.params.salt);
   }

@@ -1,7 +1,7 @@
 import { utils } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
 import { insertCancellation } from "../../../persistence/mongodb";
-import { getOrdersSalt, ValidationError } from "../../../seaport";
+import { getReplacedOrderHashes, hashOrders, ValidationError } from "../../../seaport";
 import { createLogger } from "../../../utils/logger";
 import { getTimestamp } from "../../../utils/time";
 import { ORDER_REPLACEMENT_REQUEST } from "../../../validation/schemas";
@@ -29,9 +29,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(400).end();
       return;
     }
-    const orders = data.orders;
+    const { newOrders, replacedOrders } = data;
+    const [hashes, , hashingError] = await hashOrders(replacedOrders);
 
-    const [salts, orderSigner, error] = await getOrdersSalt(orders);
+    if (hashingError != ValidationError.NONE) {
+      LOGGER.error(`Validation Error: ${hashingError}`);
+      res.status(400).end();
+      return;
+    }
+
+    const replacedOrdersByHash = new Map(hashes.map((hash, i) => [hash, replacedOrders[i]]));
+    const [salts, orderSigner, error] = await getReplacedOrderHashes(replacedOrdersByHash, newOrders);
 
     if (error != ValidationError.NONE) {
       LOGGER.error(`Validation Error: ${error}`);

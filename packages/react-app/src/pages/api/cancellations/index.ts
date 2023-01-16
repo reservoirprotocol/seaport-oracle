@@ -66,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     LOGGER.info(`cancelRequestSigner: ${cancelRequestSigner}`);
 
     if (cancelRequestSigner.toUpperCase() != orderSigner?.toUpperCase()) {
-      LOGGER.info(`Cancel signer:${cancelRequestSigner} is not order signer: ${orderSigner}`);
+      LOGGER.info(`Cancel signer: ${cancelRequestSigner} is not order signer: ${orderSigner}`);
       res.status(401).end();
       return;
     } else {

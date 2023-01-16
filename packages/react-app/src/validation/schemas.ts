@@ -48,5 +48,6 @@ export const ORDER_CANCELLATION_REQUEST = z.object({
 });
 
 export const ORDER_REPLACEMENT_REQUEST = z.object({
-  orders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
+  replacedOrders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
+  newOrders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
 });
