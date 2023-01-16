@@ -30,6 +30,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return;
     }
     const { newOrders, replacedOrders } = data;
+
+    if (newOrders.length !== replacedOrders.length) {
+      LOGGER.error(`Number of orders do not match`);
+      res.status(400).end();
+      return;
+    }
+
     const [hashes, , hashingError] = await hashOrders(replacedOrders);
 
     if (hashingError != ValidationError.NONE) {

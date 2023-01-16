@@ -130,9 +130,23 @@ describe("Replacement API", () => {
         });
       });
 
-      it("return 400 if replacement signer is wrong", async () => {
+      it("returns 400 if replacement signer is wrong", async () => {
         const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
         const newOrders = await mockReplacementOrders(user2, hashesToReplace);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { newOrders, replacedOrders },
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(400);
+      });
+
+      it("returns 400 if number of orders do not match", async () => {
+        const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
+        const newOrders = await mockReplacementOrders(user1, [...hashesToReplace, "111"]);
 
         const { req, res } = createMocks({
           method: "POST",
