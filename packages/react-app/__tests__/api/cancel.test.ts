@@ -11,6 +11,7 @@ import { CANCEL_REQUEST_EIP712_TYPE, EIP712_DOMAIN } from "../../src/types/types
 import { MAX_RETURNED_CANCELLATIONS } from "../../src/utils/constants";
 import * as time from "../../src/utils/time";
 import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
+import { mockOrders } from "../utils/mocks";
 
 jest.mock("../../src/utils/time", () => ({
   getTimestamp: jest.fn(),
@@ -200,20 +201,3 @@ describe("Cancellation API", () => {
     });
   });
 });
-
-async function mockOrders(user: Wallet, numberOfOrders: number): Promise<[OrderComponents[], string[]]> {
-  const orders: OrderComponents[] = [];
-  const orderHashes: string[] = [];
-
-  for (let i = 0; i < numberOfOrders; i++) {
-    const orderData = generateMock(SEAPORT_ORDER_SCHEMA);
-    orderData.offerer = user.address;
-    const order = new Sdk.Seaport.Order(chainId, orderData);
-    await order.sign(user);
-    const orderHash = await order.hash();
-    orderHashes.push(orderHash);
-    orders.push(order.params);
-  }
-
-  return [orders, orderHashes];
-}

@@ -9,6 +9,7 @@ import handler from "../../src/pages/api/replacements";
 import * as mongo from "../../src/persistence/mongodb";
 import * as time from "../../src/utils/time";
 import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
+import { mockOrders, mockReplacementOrders } from "../utils/mocks";
 
 jest.mock("../../src/utils/time", () => ({
   getTimestamp: jest.fn(),
@@ -74,59 +75,87 @@ describe("Replacement API", () => {
       });
 
       it("replaces order if owner requests it", async () => {
-        const idToCancel = "666";
-        const orders = await mockOrders(user1, [idToCancel]);
+        const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
+        const newOrders = await mockReplacementOrders(user1, hashesToReplace);
 
         const { req, res } = createMocks({
           method: "POST",
-          body: { orders },
+          body: { newOrders, replacedOrders },
         });
 
         await handler(req, res);
         expect(res._getStatusCode()).toBe(200);
         expect(mockedInsertCancellation).toHaveBeenCalledWith({
-          orderHash: idToCancel,
+          orderHash: hashesToReplace[0],
           owner: user1.address,
           timestamp: 1,
         });
       });
 
       it("cancels multiple orders if owner requests it", async () => {
-        const idsToCancel = ["1", "2", "3", "4", "5"];
-        const orders = await mockOrders(user1, idsToCancel);
+        const [replacedOrders, hashesToReplace] = await mockOrders(user1, 5);
+        const newOrders = await mockReplacementOrders(user1, hashesToReplace);
 
         const { req, res } = createMocks({
           method: "POST",
-          body: { orders },
+          body: { newOrders, replacedOrders },
         });
 
         await handler(req, res);
         expect(res._getStatusCode()).toBe(200);
         expect(mockedInsertCancellation).toHaveBeenNthCalledWith(1, {
-          orderHash: idsToCancel[0],
+          orderHash: hashesToReplace[0],
           owner: user1.address,
           timestamp: 1,
         });
         expect(mockedInsertCancellation).toHaveBeenNthCalledWith(2, {
-          orderHash: idsToCancel[1],
+          orderHash: hashesToReplace[1],
           owner: user1.address,
           timestamp: 1,
         });
         expect(mockedInsertCancellation).toHaveBeenNthCalledWith(3, {
-          orderHash: idsToCancel[2],
+          orderHash: hashesToReplace[2],
           owner: user1.address,
           timestamp: 1,
         });
         expect(mockedInsertCancellation).toHaveBeenNthCalledWith(4, {
-          orderHash: idsToCancel[3],
+          orderHash: hashesToReplace[3],
           owner: user1.address,
           timestamp: 1,
         });
         expect(mockedInsertCancellation).toHaveBeenNthCalledWith(5, {
-          orderHash: idsToCancel[4],
+          orderHash: hashesToReplace[4],
           owner: user1.address,
           timestamp: 1,
         });
+      });
+
+      it("returns 400 if replacement signer is wrong", async () => {
+        const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
+        const newOrders = await mockReplacementOrders(user2, hashesToReplace);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { newOrders, replacedOrders },
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(400);
+      });
+
+      it("returns 400 if number of orders do not match", async () => {
+        const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
+        const newOrders = await mockReplacementOrders(user1, [...hashesToReplace, "111"]);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { newOrders, replacedOrders },
+        });
+
+        await handler(req, res);
+
+        expect(res._getStatusCode()).toBe(400);
       });
 
       it("return 400 if salt missing", async () => {
@@ -171,20 +200,3 @@ describe("Replacement API", () => {
     });
   });
 });
-
-async function mockOrders(user: Wallet, salts: string[]): Promise<OrderComponents[]> {
-  const orders: OrderComponents[] = [];
-
-  for (let i = 0; i < salts.length; i++) {
-    const orderData = generateMock(SEAPORT_ORDER_SCHEMA);
-    orderData.offerer = user.address;
-    if (salts[i]) {
-      orderData.salt = salts[i];
-    }
-    const order = new Sdk.Seaport.Order(chainId, orderData);
-    await order.sign(user);
-    orders.push(order.params);
-  }
-
-  return orders;
-}
