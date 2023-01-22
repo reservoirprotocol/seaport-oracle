@@ -27,159 +27,101 @@ import type {
   PromiseOrValue,
 } from "../common";
 
-export type OfferItemStruct = {
+export type SpentItemStruct = {
   itemType: PromiseOrValue<BigNumberish>;
   token: PromiseOrValue<string>;
-  identifierOrCriteria: PromiseOrValue<BigNumberish>;
-  startAmount: PromiseOrValue<BigNumberish>;
-  endAmount: PromiseOrValue<BigNumberish>;
+  identifier: PromiseOrValue<BigNumberish>;
+  amount: PromiseOrValue<BigNumberish>;
 };
 
-export type OfferItemStructOutput = [
-  number,
-  string,
-  BigNumber,
-  BigNumber,
-  BigNumber
-] & {
+export type SpentItemStructOutput = [number, string, BigNumber, BigNumber] & {
   itemType: number;
   token: string;
-  identifierOrCriteria: BigNumber;
-  startAmount: BigNumber;
-  endAmount: BigNumber;
+  identifier: BigNumber;
+  amount: BigNumber;
 };
 
-export type ConsiderationItemStruct = {
+export type ReceivedItemStruct = {
   itemType: PromiseOrValue<BigNumberish>;
   token: PromiseOrValue<string>;
-  identifierOrCriteria: PromiseOrValue<BigNumberish>;
-  startAmount: PromiseOrValue<BigNumberish>;
-  endAmount: PromiseOrValue<BigNumberish>;
+  identifier: PromiseOrValue<BigNumberish>;
+  amount: PromiseOrValue<BigNumberish>;
   recipient: PromiseOrValue<string>;
 };
 
-export type ConsiderationItemStructOutput = [
+export type ReceivedItemStructOutput = [
   number,
   string,
-  BigNumber,
   BigNumber,
   BigNumber,
   string
 ] & {
   itemType: number;
   token: string;
-  identifierOrCriteria: BigNumber;
-  startAmount: BigNumber;
-  endAmount: BigNumber;
+  identifier: BigNumber;
+  amount: BigNumber;
   recipient: string;
 };
 
-export type OrderParametersStruct = {
+export type ZoneParametersStruct = {
+  orderHash: PromiseOrValue<BytesLike>;
+  fulfiller: PromiseOrValue<string>;
   offerer: PromiseOrValue<string>;
-  zone: PromiseOrValue<string>;
-  offer: OfferItemStruct[];
-  consideration: ConsiderationItemStruct[];
-  orderType: PromiseOrValue<BigNumberish>;
+  offer: SpentItemStruct[];
+  consideration: ReceivedItemStruct[];
+  extraData: PromiseOrValue<BytesLike>;
+  orderHashes: PromiseOrValue<BytesLike>[];
   startTime: PromiseOrValue<BigNumberish>;
   endTime: PromiseOrValue<BigNumberish>;
   zoneHash: PromiseOrValue<BytesLike>;
-  salt: PromiseOrValue<BigNumberish>;
-  conduitKey: PromiseOrValue<BytesLike>;
-  totalOriginalConsiderationItems: PromiseOrValue<BigNumberish>;
 };
 
-export type OrderParametersStructOutput = [
+export type ZoneParametersStructOutput = [
   string,
   string,
-  OfferItemStructOutput[],
-  ConsiderationItemStructOutput[],
-  number,
+  string,
+  SpentItemStructOutput[],
+  ReceivedItemStructOutput[],
+  string,
+  string[],
   BigNumber,
   BigNumber,
-  string,
-  BigNumber,
-  string,
-  BigNumber
+  string
 ] & {
+  orderHash: string;
+  fulfiller: string;
   offerer: string;
-  zone: string;
-  offer: OfferItemStructOutput[];
-  consideration: ConsiderationItemStructOutput[];
-  orderType: number;
+  offer: SpentItemStructOutput[];
+  consideration: ReceivedItemStructOutput[];
+  extraData: string;
+  orderHashes: string[];
   startTime: BigNumber;
   endTime: BigNumber;
   zoneHash: string;
-  salt: BigNumber;
-  conduitKey: string;
-  totalOriginalConsiderationItems: BigNumber;
 };
 
-export type AdvancedOrderStruct = {
-  parameters: OrderParametersStruct;
-  numerator: PromiseOrValue<BigNumberish>;
-  denominator: PromiseOrValue<BigNumberish>;
-  signature: PromiseOrValue<BytesLike>;
-  extraData: PromiseOrValue<BytesLike>;
-};
-
-export type AdvancedOrderStructOutput = [
-  OrderParametersStructOutput,
-  BigNumber,
-  BigNumber,
-  string,
-  string
-] & {
-  parameters: OrderParametersStructOutput;
-  numerator: BigNumber;
-  denominator: BigNumber;
-  signature: string;
-  extraData: string;
-};
-
-export type CriteriaResolverStruct = {
-  orderIndex: PromiseOrValue<BigNumberish>;
-  side: PromiseOrValue<BigNumberish>;
-  index: PromiseOrValue<BigNumberish>;
-  identifier: PromiseOrValue<BigNumberish>;
-  criteriaProof: PromiseOrValue<BytesLike>[];
-};
-
-export type CriteriaResolverStructOutput = [
-  BigNumber,
-  number,
-  BigNumber,
-  BigNumber,
-  string[]
-] & {
-  orderIndex: BigNumber;
-  side: number;
-  index: BigNumber;
-  identifier: BigNumber;
-  criteriaProof: string[];
-};
-
-export interface CancelXInterface extends utils.Interface {
+export interface BreakwaterInterface extends utils.Interface {
   functions: {
     "ORDER_VALIDITY_HASHTYPE()": FunctionFragment;
-    "isValidOrder(bytes32,address,address,bytes32)": FunctionFragment;
-    "isValidOrderIncludingExtraData(bytes32,address,((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes),bytes32[],(uint256,uint8,uint256,uint256,bytes32[])[])": FunctionFragment;
+    "addSigner(address)": FunctionFragment;
+    "removeSigner(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "setSigner(address)": FunctionFragment;
-    "signer()": FunctionFragment;
+    "signerStatus(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "ORDER_VALIDITY_HASHTYPE"
-      | "isValidOrder"
-      | "isValidOrderIncludingExtraData"
+      | "addSigner"
+      | "removeSigner"
       | "owner"
       | "renounceOwnership"
-      | "setSigner"
-      | "signer"
+      | "signerStatus"
       | "transferOwnership"
+      | "validateOrder"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -187,23 +129,12 @@ export interface CancelXInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "isValidOrder",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>
-    ]
+    functionFragment: "addSigner",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "isValidOrderIncludingExtraData",
-    values: [
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      AdvancedOrderStruct,
-      PromiseOrValue<BytesLike>[],
-      CriteriaResolverStruct[]
-    ]
+    functionFragment: "removeSigner",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -211,13 +142,16 @@ export interface CancelXInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setSigner",
+    functionFragment: "signerStatus",
     values: [PromiseOrValue<string>]
   ): string;
-  encodeFunctionData(functionFragment: "signer", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "validateOrder",
+    values: [ZoneParametersStruct]
   ): string;
 
   decodeFunctionResult(
@@ -225,11 +159,11 @@ export interface CancelXInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isValidOrder",
+    functionFragment: "addSigner",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "isValidOrderIncludingExtraData",
+    functionFragment: "removeSigner",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -237,18 +171,28 @@ export interface CancelXInterface extends utils.Interface {
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "setSigner", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "signer", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "signerStatus",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "validateOrder",
     data: BytesLike
   ): Result;
 
   events: {
     "OwnershipTransferred(address,address)": EventFragment;
+    "SignerAdded(address)": EventFragment;
+    "SignerRemoved(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SignerAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SignerRemoved"): EventFragment;
 }
 
 export interface OwnershipTransferredEventObject {
@@ -263,12 +207,26 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface CancelX extends BaseContract {
+export interface SignerAddedEventObject {
+  signer: string;
+}
+export type SignerAddedEvent = TypedEvent<[string], SignerAddedEventObject>;
+
+export type SignerAddedEventFilter = TypedEventFilter<SignerAddedEvent>;
+
+export interface SignerRemovedEventObject {
+  signer: string;
+}
+export type SignerRemovedEvent = TypedEvent<[string], SignerRemovedEventObject>;
+
+export type SignerRemovedEventFilter = TypedEventFilter<SignerRemovedEvent>;
+
+export interface Breakwater extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CancelXInterface;
+  interface: BreakwaterInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -292,22 +250,15 @@ export interface CancelX extends BaseContract {
   functions: {
     ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
-    isValidOrder(
-      arg0: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      arg2: PromiseOrValue<string>,
-      arg3: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+    addSigner(
+      signer: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
-    isValidOrderIncludingExtraData(
-      orderHash: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      order: AdvancedOrderStruct,
-      arg3: PromiseOrValue<BytesLike>[],
-      arg4: CriteriaResolverStruct[],
-      overrides?: CallOverrides
-    ): Promise<[string] & { validOrderMagicValue: string }>;
+    removeSigner(
+      signer: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -315,37 +266,33 @@ export interface CancelX extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    setSigner(
-      signer_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    signer(overrides?: CallOverrides): Promise<[string]>;
+    signerStatus(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[number]>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    validateOrder(
+      zoneParameters: ZoneParametersStruct,
+      overrides?: CallOverrides
+    ): Promise<[string] & { validOrderMagicValue: string }>;
   };
 
   ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-  isValidOrder(
-    arg0: PromiseOrValue<BytesLike>,
-    arg1: PromiseOrValue<string>,
-    arg2: PromiseOrValue<string>,
-    arg3: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  addSigner(
+    signer: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
-  isValidOrderIncludingExtraData(
-    orderHash: PromiseOrValue<BytesLike>,
-    arg1: PromiseOrValue<string>,
-    order: AdvancedOrderStruct,
-    arg3: PromiseOrValue<BytesLike>[],
-    arg4: CriteriaResolverStruct[],
-    overrides?: CallOverrides
-  ): Promise<string>;
+  removeSigner(
+    signer: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -353,51 +300,52 @@ export interface CancelX extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  setSigner(
-    signer_: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  signerStatus(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<number>;
 
   transferOwnership(
     newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  validateOrder(
+    zoneParameters: ZoneParametersStruct,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   callStatic: {
     ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-    isValidOrder(
-      arg0: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      arg2: PromiseOrValue<string>,
-      arg3: PromiseOrValue<BytesLike>,
+    addSigner(
+      signer: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<void>;
 
-    isValidOrderIncludingExtraData(
-      orderHash: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      order: AdvancedOrderStruct,
-      arg3: PromiseOrValue<BytesLike>[],
-      arg4: CriteriaResolverStruct[],
+    removeSigner(
+      signer: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<void>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    setSigner(
-      signer_: PromiseOrValue<string>,
+    signerStatus(
+      arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<void>;
-
-    signer(overrides?: CallOverrides): Promise<string>;
+    ): Promise<number>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    validateOrder(
+      zoneParameters: ZoneParametersStruct,
+      overrides?: CallOverrides
+    ): Promise<string>;
   };
 
   filters: {
@@ -409,26 +357,25 @@ export interface CancelX extends BaseContract {
       previousOwner?: PromiseOrValue<string> | null,
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
+
+    "SignerAdded(address)"(signer?: null): SignerAddedEventFilter;
+    SignerAdded(signer?: null): SignerAddedEventFilter;
+
+    "SignerRemoved(address)"(signer?: null): SignerRemovedEventFilter;
+    SignerRemoved(signer?: null): SignerRemovedEventFilter;
   };
 
   estimateGas: {
     ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    isValidOrder(
-      arg0: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      arg2: PromiseOrValue<string>,
-      arg3: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+    addSigner(
+      signer: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    isValidOrderIncludingExtraData(
-      orderHash: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      order: AdvancedOrderStruct,
-      arg3: PromiseOrValue<BytesLike>[],
-      arg4: CriteriaResolverStruct[],
-      overrides?: CallOverrides
+    removeSigner(
+      signer: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -437,16 +384,19 @@ export interface CancelX extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    setSigner(
-      signer_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    signerStatus(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    signer(overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    validateOrder(
+      zoneParameters: ZoneParametersStruct,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
@@ -455,21 +405,14 @@ export interface CancelX extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isValidOrder(
-      arg0: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      arg2: PromiseOrValue<string>,
-      arg3: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
+    addSigner(
+      signer: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    isValidOrderIncludingExtraData(
-      orderHash: PromiseOrValue<BytesLike>,
-      arg1: PromiseOrValue<string>,
-      order: AdvancedOrderStruct,
-      arg3: PromiseOrValue<BytesLike>[],
-      arg4: CriteriaResolverStruct[],
-      overrides?: CallOverrides
+    removeSigner(
+      signer: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -478,16 +421,19 @@ export interface CancelX extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    setSigner(
-      signer_: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    signerStatus(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    signer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    validateOrder(
+      zoneParameters: ZoneParametersStruct,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

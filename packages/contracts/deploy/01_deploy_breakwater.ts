@@ -5,16 +5,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
 
-  const { deployer, signer } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
 
-  await deploy("CancelX", {
+  await deploy("Breakwater", {
     from: deployer,
     log: true,
-    args: ["CancelX", "1.0.0", signer],
+    args: ["Breakwater", "1.0.0", ""], //TODO add proper api endpoint
   });
   return true;
 };
 export default func;
 
-func.id = "CancelXDeployment";
+func.id = "BreakwaterDeployment";
 func.tags = ["Deployment"];

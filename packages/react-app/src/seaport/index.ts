@@ -1,8 +1,7 @@
 import * as Sdk from "@reservoir0x/sdk";
+import { OrderComponents } from "@reservoir0x/sdk/dist/seaport/types";
 import { BigNumber } from "ethers";
-import { z } from "zod";
 import { chainId } from "../eth";
-import { SEAPORT_ORDER_SCHEMA } from "../validation/schemas";
 
 export enum ValidationError {
   NONE,
@@ -11,9 +10,7 @@ export enum ValidationError {
   SALT_MISSING,
 }
 
-export type SeaPortOrder = z.infer<typeof SEAPORT_ORDER_SCHEMA>;
-
-export async function hashOrders(orders: SeaPortOrder[]): Promise<[string[], string, ValidationError]> {
+export async function hashOrders(orders: OrderComponents[]): Promise<[string[], string, ValidationError]> {
   let orderSigner: string = "";
   const orderHashes = [];
   for (let i = 0; i < orders.length; i++) {
@@ -36,8 +33,8 @@ export async function hashOrders(orders: SeaPortOrder[]): Promise<[string[], str
 }
 
 export async function getReplacedOrderHashes(
-  replacedOrdersByHash: Map<string, SeaPortOrder>,
-  newOrders: SeaPortOrder[],
+  replacedOrdersByHash: Map<string, OrderComponents>,
+  newOrders: OrderComponents[],
 ): Promise<[string[], string, ValidationError]> {
   let orderSigner: string = "";
   const salts = [];

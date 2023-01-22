@@ -151,7 +151,7 @@ export type CriteriaResolverStructOutput = [
   criteriaProof: string[];
 };
 
-export interface CancelXInterface extends utils.Interface {
+export interface BreakwaterInterface extends utils.Interface {
   functions: {
     "MINT_TOKEN_HASHTYPE()": FunctionFragment;
     "isValidOrder(bytes32,address,address,bytes32)": FunctionFragment;
@@ -204,12 +204,12 @@ export interface CancelXInterface extends utils.Interface {
   events: {};
 }
 
-export interface CancelX extends BaseContract {
+export interface Breakwater extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CancelXInterface;
+  interface: BreakwaterInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.13;
 
-import {
-    OrderType,
-    BasicOrderType,
-    ItemType,
-    Side
-} from "./ConsiderationEnums.sol";
+import { OrderType, BasicOrderType, ItemType, Side } from "./ConsiderationEnums.sol";
 
 /**
  * @dev An order contains eleven components: an offerer, a zone (or account that
@@ -162,9 +157,9 @@ struct Order {
  * @dev Advanced orders include a numerator (i.e. a fraction to attempt to fill)
  *      and a denominator (the total size of the order) in addition to the
  *      signature and other order parameters. It also supports an optional field
- *      for supplying extra data; this data will be included in a staticcall to
- *      `isValidOrderIncludingExtraData` on the zone for the order if the order
- *      type is restricted and the offerer or zone are not the caller.
+ *      for supplying extra data; this data will be provided to the zone if the
+ *      order type is restricted and the zone is not the caller, or will be
+ *      provided to the offerer as context for contract order types.
  */
 struct AdvancedOrder {
     OrderParameters parameters;
@@ -240,4 +235,32 @@ struct Execution {
     ReceivedItem item;
     address offerer;
     bytes32 conduitKey;
+}
+
+/**
+ * @dev Restricted orders are validated post-execution by calling validateOrder
+ *      on the zone. This struct provides context about the order fulfillment
+ *      and any supplied extraData, as well as all order hashes fulfilled in a
+ *      call to a match or fulfillAvailable method.
+ */
+struct ZoneParameters {
+    bytes32 orderHash;
+    address fulfiller;
+    address offerer;
+    SpentItem[] offer;
+    ReceivedItem[] consideration;
+    bytes extraData;
+    bytes32[] orderHashes;
+    uint256 startTime;
+    uint256 endTime;
+    bytes32 zoneHash;
+}
+
+/**
+ * @dev Zones and contract offerers can communicate which schemas they implement
+ *      along with any associated metadata related to each schema.
+ */
+struct Schema {
+    uint256 id;
+    bytes metadata;
 }

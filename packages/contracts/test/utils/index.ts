@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, BytesLike } from "ethers";
+import { BigNumber, BigNumberish, BytesLike, utils } from "ethers";
 import { ethers } from "hardhat";
 
 export const A_NON_ZERO_ADDRESS = "0x1234000000000000000000000000000000000000";
@@ -62,16 +62,41 @@ export function cleanResult(result: { [key: string]: any }): any {
   return clean;
 }
 
+export const convertSignatureToEIP2098 = (signature: string) => {
+  if (signature.length === 130) {
+    return signature;
+  }
+
+  if (signature.length !== 132) {
+    throw Error("invalid signature length (must be 64 or 65 bytes)");
+  }
+
+  return utils.splitSignature(signature).compact;
+};
+
 export const EIP712_DOMAIN = (chainId: number, contract: string) => ({
-  name: "CancelX",
+  name: "Breakwater",
   version: "1.0.0",
   chainId,
   verifyingContract: contract,
 });
 
-export const ORDER_VALIDITY_EIP712_TYPE = {
-  OrderValidity: [
-    { name: "blockDeadline", type: "uint256" },
+export const SIGNED_ORDER_EIP712_TYPE = {
+  SignedOrder: [
+    { name: "fulfiller", type: "address" },
+    { name: "expiration", type: "uint64" },
     { name: "orderHash", type: "bytes32" },
+    { name: "context", type: "bytes" },
+  ],
+};
+
+export const CONSIDERATION_EIP712_TYPE = {
+  Consideration: [{ name: "consideration", type: "ReceivedItem[]" }],
+  ReceivedItem: [
+    { name: "itemType", type: "uint8" },
+    { name: "token", type: "address" },
+    { name: "identifier", type: "uint256" },
+    { name: "amount", type: "uint256" },
+    { name: "recipient", type: "address" },
   ],
 };

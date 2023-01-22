@@ -17,17 +17,37 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
     getContractFactory(
-      name: "CancelX",
+      name: "Breakwater",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.CancelX__factory>;
+    ): Promise<Contracts.Breakwater__factory>;
+    getContractFactory(
+      name: "SIP5Interface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SIP5Interface__factory>;
+    getContractFactory(
+      name: "SIP7Interface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SIP7Interface__factory>;
     getContractFactory(
       name: "ZoneInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ZoneInterface__factory>;
     getContractFactory(
-      name: "ICancelX",
+      name: "IBreakwater",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ICancelX__factory>;
+    ): Promise<Contracts.IBreakwater__factory>;
+    getContractFactory(
+      name: "IMultiX",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IMultiX__factory>;
+    getContractFactory(
+      name: "SIP07Zone",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SIP07Zone__factory>;
+    getContractFactory(
+      name: "SIP7Zone",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SIP7Zone__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -35,20 +55,45 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
     getContractAt(
-      name: "CancelX",
+      name: "Breakwater",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.CancelX>;
+    ): Promise<Contracts.Breakwater>;
+    getContractAt(
+      name: "SIP5Interface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SIP5Interface>;
+    getContractAt(
+      name: "SIP7Interface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SIP7Interface>;
     getContractAt(
       name: "ZoneInterface",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ZoneInterface>;
     getContractAt(
-      name: "ICancelX",
+      name: "IBreakwater",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.ICancelX>;
+    ): Promise<Contracts.IBreakwater>;
+    getContractAt(
+      name: "IMultiX",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IMultiX>;
+    getContractAt(
+      name: "SIP07Zone",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SIP07Zone>;
+    getContractAt(
+      name: "SIP7Zone",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SIP7Zone>;
 
     // default types
     getContractFactory(

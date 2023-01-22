@@ -9,12 +9,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (signer === deployer) throw new Error("Signer cannot be deployer");
 
   await execute(
-    "CancelX",
+    "Breakwater",
     {
       from: deployer,
       log: true,
     },
-    "setSigner",
+    "addSigner",
     signer,
   );
   return true;

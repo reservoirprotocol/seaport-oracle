@@ -4,10 +4,10 @@ import { OrderComponents } from "@reservoir0x/sdk/dist/seaport/types";
 import { Wallet } from "ethers";
 import { when } from "jest-when";
 import { createMocks } from "node-mocks-http";
+import { signCancelRequest } from "../../src/eip712";
 import { chainId } from "../../src/eth";
 import handler from "../../src/pages/api/cancellations";
 import * as mongo from "../../src/persistence/mongodb";
-import { CANCEL_REQUEST_EIP712_TYPE, EIP712_DOMAIN } from "../../src/types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../src/utils/constants";
 import * as time from "../../src/utils/time";
 import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
@@ -60,9 +60,7 @@ describe("Cancellation API", () => {
         const orders: OrderComponents[] = [];
         const orderHashes: string[] = [];
 
-        const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
-          orderHashes,
-        });
+        const signature = await signCancelRequest(user1, orderHashes);
 
         const { req, res } = createMocks({
           method: "POST",
@@ -76,9 +74,7 @@ describe("Cancellation API", () => {
       it("cancels order if owner requests it", async () => {
         const [orders, orderHashes] = await mockOrders(user1, 1);
 
-        const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
-          orderHashes,
-        });
+        const signature = await signCancelRequest(user1, orderHashes);
 
         const { req, res } = createMocks({
           method: "POST",
@@ -98,9 +94,7 @@ describe("Cancellation API", () => {
       it("cancels multiple orders if owner requests it", async () => {
         const [orders, orderHashes] = await mockOrders(user1, 10);
 
-        const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
-          orderHashes,
-        });
+        const signature = await signCancelRequest(user1, orderHashes);
 
         const { req, res } = createMocks({
           method: "POST",
@@ -115,9 +109,7 @@ describe("Cancellation API", () => {
       it("return 401 if non owner requests cancellation", async () => {
         const [orders, orderHashes] = await mockOrders(user1, 1);
 
-        const signature = await user2._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
-          orderHashes,
-        });
+        const signature = await signCancelRequest(user2, orderHashes);
 
         const { req, res } = createMocks({
           method: "POST",
@@ -146,9 +138,7 @@ describe("Cancellation API", () => {
         orderHashes.push(orderHash);
         orders.push(order.params);
 
-        const signature = await user1._signTypedData(EIP712_DOMAIN(chainId), CANCEL_REQUEST_EIP712_TYPE, {
-          orderHashes,
-        });
+        const signature = await signCancelRequest(user1, orderHashes);
 
         const { req, res } = createMocks({
           method: "POST",

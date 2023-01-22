@@ -2,7 +2,7 @@ import { Db, MongoClient, MongoClientOptions } from "mongodb";
 import { OrderCancellation } from "../types/types";
 
 const MONGODB_URI = process.env.MONGO_URL;
-const MONGODB_DB = process.env.DB_NAME ?? "cancelx";
+const MONGODB_DB = process.env.DB_NAME ?? "breakwater";
 
 // check the MongoDB URI
 if (!MONGODB_URI) {
@@ -73,4 +73,11 @@ export async function findCancellations(limit: number, lastId?: string) {
     query = collection.find({});
   }
   return await query.sort({ _id: 1 }).limit(limit).toArray();
+}
+
+export async function isFlagged(token: string, identifier: string): Promise<boolean> {
+  const { db } = await connectToDatabase();
+  const collection = db.collection("blacklist");
+  const count = await collection.count({ token, identifier });
+  return count > 0;
 }

@@ -42,6 +42,14 @@ export const SEAPORT_ORDER_SCHEMA = z.object({
   signature: z.string(),
 });
 
+export const RECEIVED_ITEM = z.object({
+  itemType: solidityEnum(ItemType),
+  token: ethAddress,
+  identifier: uint256,
+  amount: uint256,
+  recipient: ethAddress,
+});
+
 export const ORDER_CANCELLATION_REQUEST = z.object({
   signature: z.string(),
   orders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
@@ -50,4 +58,10 @@ export const ORDER_CANCELLATION_REQUEST = z.object({
 export const ORDER_REPLACEMENT_REQUEST = z.object({
   replacedOrders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
   newOrders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
+});
+
+export const ORDER_SIGNATURE_REQUEST = z.object({
+  orders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
+  considerations: z.array(z.array(RECEIVED_ITEM).nonempty()).nonempty(),
+  fulfiller: ethAddress,
 });

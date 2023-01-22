@@ -1,10 +1,8 @@
 import { utils } from "ethers";
-import { verifyTypedData } from "ethers/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";
-import { chainId } from "../../../eth";
+import { recoverCancelRequestSigner } from "../../../eip712";
 import { findCancellations, insertCancellation } from "../../../persistence/mongodb";
 import { hashOrders, ValidationError } from "../../../seaport";
-import { CANCEL_REQUEST_EIP712_TYPE, EIP712_DOMAIN } from "../../../types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../../utils/constants";
 import { createLogger } from "../../../utils/logger";
 import { getTimestamp } from "../../../utils/time";
@@ -56,12 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     LOGGER.info(`orderHashes: ${JSON.stringify(orderHashes)}`);
     LOGGER.info(`orderSigner: ${orderSigner}`);
 
-    const cancelRequestSigner = verifyTypedData(
-      EIP712_DOMAIN(chainId),
-      CANCEL_REQUEST_EIP712_TYPE,
-      { orderHashes },
-      data.signature,
-    );
+    const cancelRequestSigner = recoverCancelRequestSigner(orderHashes, data);
 
     LOGGER.info(`cancelRequestSigner: ${cancelRequestSigner}`);
 
