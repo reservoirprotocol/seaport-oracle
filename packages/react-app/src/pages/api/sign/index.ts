@@ -1,22 +1,22 @@
-import * as Sdk from "@reservoir0x/sdk";
-import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
+import { ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
 import { BytesLike, defaultAbiCoder } from "ethers/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";
+import { z } from "zod";
 import { hashConsideration, signOrder } from "../../../eip712";
-import { chainId, convertSignatureToEIP2098, latestTimestamp } from "../../../eth";
+import { convertSignatureToEIP2098, latestTimestamp } from "../../../eth";
 import { Features } from "../../../features/features";
 import { FlaggingChecker } from "../../../features/flagging/FlaggingChecker";
 import { isCancelled } from "../../../persistence/mongodb";
-import { ApiError, ExtraData, SignedOrders } from "../../../types/types";
+import { SignedOrder, SignedOrders } from "../../../types/types";
 import { EXPIRATION_IN_S } from "../../../utils/constants";
 import { createLogger } from "../../../utils/logger";
-import { ORDER_SIGNATURE_REQUEST } from "../../../validation/schemas";
+import { ORDER_SIGNATURE_REQUEST, ORDER_SIGNATURE_REQUEST_ITEM } from "../../../validation/schemas";
 
 const LOGGER = createLogger("sign");
 
 const CANCELLATION_ERROR = (orderHash: string) => ({
   orderHash,
-  error: "OrderCancelled",
+  error: "SignaturesNoLongerVended",
   message: "The order has been cancelled by its creator",
 });
 
@@ -27,12 +27,11 @@ const FLAGGING_ERROR = (orderHash: string) => ({
 });
 
 type SignatureRequestContext = {
-  fulfiller: string;
   expiration: number;
-  signedOrders: ExtraData[];
-  errors: ApiError[];
   flaggingChecker: FlaggingChecker;
 };
+
+type OrderSignatureRequestItem = z.infer<typeof ORDER_SIGNATURE_REQUEST_ITEM>;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<SignedOrders | null>) {
   try {
@@ -46,68 +45,59 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     try {
       data = ORDER_SIGNATURE_REQUEST.parse(req.body);
     } catch (e) {
-      LOGGER.error(e);
+      LOGGER.error((e as Error).message);
       res.status(400).end();
       return;
     }
 
     const expiration = (await latestTimestamp()) + EXPIRATION_IN_S;
-    const { orders, considerations, fulfiller } = data;
+    const { orders } = data;
 
     const context: SignatureRequestContext = {
-      fulfiller,
       expiration,
-      signedOrders: [],
-      errors: [],
-      flaggingChecker: new FlaggingChecker(considerations),
+      flaggingChecker: new FlaggingChecker(orders.map(o => o.consideration ?? [])),
     };
-
+    const signedOrders = [];
     for (let i = 0; i < orders.length; i++) {
-      await processOrder(context, orders[i], considerations[i]);
+      signedOrders.push(await processOrder(context, orders[i]));
     }
 
-    res.status(200).json({ orders: context.signedOrders, errors: context.errors });
+    res.status(200).json({ orders: signedOrders });
   } catch (e) {
-    LOGGER.error(e);
+    LOGGER.error((e as Error).message);
     res.status(500).end();
   }
 }
 
-async function processOrder(
-  context: SignatureRequestContext,
-  orderData: OrderComponents,
-  consideration: ReceivedItem[],
-) {
-  const order = new Sdk.Seaport.Order(chainId, orderData);
-  const orderHash = order.hash();
-
+async function processOrder(context: SignatureRequestContext, order: OrderSignatureRequestItem): Promise<SignedOrder> {
+  const { orderHash, consideration, fulfiller, zoneHash } = order;
   LOGGER.info(`Processing Order: ${orderHash}`);
 
   if (await isCancelled(orderHash.toString())) {
     LOGGER.info(`Order: ${orderHash} is cancelled`);
-    context.errors.push(CANCELLATION_ERROR(orderHash));
-    return;
+    return CANCELLATION_ERROR(orderHash);
   }
 
-  const features = new Features(order.params.zoneHash);
+  const features = new Features(zoneHash);
+
   if (features.checkFlagged()) {
     const flagged = await context.flaggingChecker.containsFlagged(consideration);
+
     if (flagged) {
       LOGGER.info(`Found flagged token in ${orderHash}'s consideration`);
-      context.errors.push(FLAGGING_ERROR(orderHash));
-      return;
+      return FLAGGING_ERROR(orderHash);
     }
   }
 
-  const extraData = await encodeExtraData(consideration, context.fulfiller, context.expiration, orderHash);
-  context.signedOrders.push({ extraData });
+  const extraData = await encodeExtraData(fulfiller, context.expiration, orderHash, consideration);
+  return { orderHash, extraData };
 }
 
 async function encodeExtraData(
-  consideration: ReceivedItem[],
   fulfiller: string,
   expiration: number,
   orderHash: string,
+  consideration: ReceivedItem[],
 ) {
   const context: BytesLike = hashConsideration(consideration);
   const signature = await signOrder(fulfiller, expiration, orderHash, context);

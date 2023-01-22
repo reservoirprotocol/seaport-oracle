@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
     await handlePost();
   } catch (e) {
-    LOGGER.error(e);
+    LOGGER.error((e as Error).message);
     res.status(500).end();
   }
 
@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     try {
       data = ORDER_CANCELLATION_REQUEST.parse(req.body);
     } catch (e) {
-      LOGGER.error(e);
+      LOGGER.error((e as Error).message);
       res.status(400).end();
       return;
     }

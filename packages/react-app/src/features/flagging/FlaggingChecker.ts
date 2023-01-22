@@ -21,7 +21,7 @@ export class FlaggingChecker {
   }
 
   private async getFlagged() {
-    const tokenIds = this.considerations.flatMap(arr => arr).map(cons => `${cons.token}:${cons.identifier}`);
+    const tokenIds = this.considerations.flat().map(cons => `${cons.token}:${cons.identifier}`);
     return await fetchFlagged(tokenIds);
   }
 }

@@ -60,8 +60,16 @@ export const ORDER_REPLACEMENT_REQUEST = z.object({
   newOrders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
 });
 
-export const ORDER_SIGNATURE_REQUEST = z.object({
-  orders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
-  considerations: z.array(z.array(RECEIVED_ITEM).nonempty()).nonempty(),
+export const ORDER_SIGNATURE_REQUEST_ITEM = z.object({
+  chainId: z.string(),
   fulfiller: ethAddress,
+  zoneContract: ethAddress,
+  marketplaceContract: ethAddress,
+  zoneHash: bytes32,
+  orderHash: bytes32,
+  consideration: z.array(RECEIVED_ITEM),
+});
+
+export const ORDER_SIGNATURE_REQUEST = z.object({
+  orders: z.array(ORDER_SIGNATURE_REQUEST_ITEM).nonempty(),
 });
