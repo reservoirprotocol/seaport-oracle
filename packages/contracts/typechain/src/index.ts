@@ -3,8 +3,5 @@
 /* eslint-disable */
 import type * as external from "./external";
 export type { external };
-import type * as interfaces from "./interfaces";
-export type { interfaces };
 export type { Breakwater } from "./Breakwater";
-export type { SIP07Zone } from "./SIP07Zone";
 export type { SIP7Zone } from "./SIP7Zone";

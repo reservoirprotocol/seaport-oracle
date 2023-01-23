@@ -103,7 +103,7 @@ export type ZoneParametersStructOutput = [
 export interface MultiXInterface extends utils.Interface {
   functions: {
     "CONSIDERATION_ITEM_HASHTYPE()": FunctionFragment;
-    "ORDER_VALIDITY_HASHTYPE()": FunctionFragment;
+    "SIGNED_ORDER_HASHTYPE()": FunctionFragment;
     "addSigner(address)": FunctionFragment;
     "removeSigner(address)": FunctionFragment;
     "owner()": FunctionFragment;
@@ -116,7 +116,7 @@ export interface MultiXInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "CONSIDERATION_ITEM_HASHTYPE"
-      | "ORDER_VALIDITY_HASHTYPE"
+      | "SIGNED_ORDER_HASHTYPE"
       | "addSigner"
       | "removeSigner"
       | "owner"
@@ -131,7 +131,7 @@ export interface MultiXInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -165,7 +165,7 @@ export interface MultiXInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -260,7 +260,7 @@ export interface MultiX extends BaseContract {
   functions: {
     CONSIDERATION_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -296,7 +296,7 @@ export interface MultiX extends BaseContract {
 
   CONSIDERATION_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-  ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+  SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
   addSigner(
     signer: PromiseOrValue<string>,
@@ -332,7 +332,7 @@ export interface MultiX extends BaseContract {
   callStatic: {
     CONSIDERATION_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -384,7 +384,7 @@ export interface MultiX extends BaseContract {
   estimateGas: {
     CONSIDERATION_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -423,7 +423,7 @@ export interface MultiX extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    ORDER_VALIDITY_HASHTYPE(
+    SIGNED_ORDER_HASHTYPE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

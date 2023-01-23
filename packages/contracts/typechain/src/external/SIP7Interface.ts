@@ -12,7 +12,11 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -69,8 +73,28 @@ export interface SIP7InterfaceInterface extends utils.Interface {
     data: BytesLike
   ): Result;
 
-  events: {};
+  events: {
+    "SignerAdded(address)": EventFragment;
+    "SignerRemoved(address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "SignerAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SignerRemoved"): EventFragment;
 }
+
+export interface SignerAddedEventObject {
+  signer: string;
+}
+export type SignerAddedEvent = TypedEvent<[string], SignerAddedEventObject>;
+
+export type SignerAddedEventFilter = TypedEventFilter<SignerAddedEvent>;
+
+export interface SignerRemovedEventObject {
+  signer: string;
+}
+export type SignerRemovedEvent = TypedEvent<[string], SignerRemovedEventObject>;
+
+export type SignerRemovedEventFilter = TypedEventFilter<SignerRemovedEvent>;
 
 export interface SIP7Interface extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -165,7 +189,13 @@ export interface SIP7Interface extends BaseContract {
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "SignerAdded(address)"(signer?: null): SignerAddedEventFilter;
+    SignerAdded(signer?: null): SignerAddedEventFilter;
+
+    "SignerRemoved(address)"(signer?: null): SignerRemovedEventFilter;
+    SignerRemoved(signer?: null): SignerRemovedEventFilter;
+  };
 
   estimateGas: {
     addSigner(

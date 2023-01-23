@@ -112,7 +112,7 @@ export type ZoneParametersStructOutput = [
 
 export interface SIP7ZoneInterface extends utils.Interface {
   functions: {
-    "ORDER_VALIDITY_HASHTYPE()": FunctionFragment;
+    "SIGNED_ORDER_HASHTYPE()": FunctionFragment;
     "addSigner(address)": FunctionFragment;
     "getSeaportMetadata()": FunctionFragment;
     "owner()": FunctionFragment;
@@ -127,7 +127,7 @@ export interface SIP7ZoneInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "ORDER_VALIDITY_HASHTYPE"
+      | "SIGNED_ORDER_HASHTYPE"
       | "addSigner"
       | "getSeaportMetadata"
       | "owner"
@@ -141,7 +141,7 @@ export interface SIP7ZoneInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -183,7 +183,7 @@ export interface SIP7ZoneInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "addSigner", data: BytesLike): Result;
@@ -298,7 +298,7 @@ export interface SIP7Zone extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -352,7 +352,7 @@ export interface SIP7Zone extends BaseContract {
     ): Promise<[string] & { validOrderMagicValue: string }>;
   };
 
-  ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+  SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
   addSigner(
     signer: PromiseOrValue<string>,
@@ -406,7 +406,7 @@ export interface SIP7Zone extends BaseContract {
   ): Promise<string>;
 
   callStatic: {
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -479,7 +479,7 @@ export interface SIP7Zone extends BaseContract {
   };
 
   estimateGas: {
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -523,7 +523,7 @@ export interface SIP7Zone extends BaseContract {
   };
 
   populateTransaction: {
-    ORDER_VALIDITY_HASHTYPE(
+    SIGNED_ORDER_HASHTYPE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

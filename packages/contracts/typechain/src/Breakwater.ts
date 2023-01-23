@@ -114,9 +114,9 @@ export interface BreakwaterInterface extends utils.Interface {
   functions: {
     "CONSIDERATION_BYTES()": FunctionFragment;
     "CONSIDERATION_HASHTYPE()": FunctionFragment;
-    "ORDER_VALIDITY_HASHTYPE()": FunctionFragment;
     "RECEIVED_ITEM_BYTES()": FunctionFragment;
     "RECEIVED_ITEM_HASHTYPE()": FunctionFragment;
+    "SIGNED_ORDER_HASHTYPE()": FunctionFragment;
     "addSigner(address)": FunctionFragment;
     "getSeaportMetadata()": FunctionFragment;
     "owner()": FunctionFragment;
@@ -133,9 +133,9 @@ export interface BreakwaterInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "CONSIDERATION_BYTES"
       | "CONSIDERATION_HASHTYPE"
-      | "ORDER_VALIDITY_HASHTYPE"
       | "RECEIVED_ITEM_BYTES"
       | "RECEIVED_ITEM_HASHTYPE"
+      | "SIGNED_ORDER_HASHTYPE"
       | "addSigner"
       | "getSeaportMetadata"
       | "owner"
@@ -157,15 +157,15 @@ export interface BreakwaterInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "RECEIVED_ITEM_BYTES",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "RECEIVED_ITEM_HASHTYPE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -215,15 +215,15 @@ export interface BreakwaterInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "RECEIVED_ITEM_BYTES",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "RECEIVED_ITEM_HASHTYPE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "addSigner", data: BytesLike): Result;
@@ -342,11 +342,11 @@ export interface Breakwater extends BaseContract {
 
     CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
-
     RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<[string]>;
 
     RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
+
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -404,11 +404,11 @@ export interface Breakwater extends BaseContract {
 
   CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-  ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
-
   RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<string>;
 
   RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+
+  SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
   addSigner(
     signer: PromiseOrValue<string>,
@@ -466,11 +466,11 @@ export interface Breakwater extends BaseContract {
 
     CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
-
     RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<string>;
 
     RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -547,11 +547,11 @@ export interface Breakwater extends BaseContract {
 
     CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
-
     RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<BigNumber>;
 
     RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
     addSigner(
       signer: PromiseOrValue<string>,
@@ -603,15 +603,15 @@ export interface Breakwater extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    ORDER_VALIDITY_HASHTYPE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     RECEIVED_ITEM_BYTES(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     RECEIVED_ITEM_HASHTYPE(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    SIGNED_ORDER_HASHTYPE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

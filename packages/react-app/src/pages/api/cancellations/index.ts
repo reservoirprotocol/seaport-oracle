@@ -1,16 +1,25 @@
 import { utils } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
 import { recoverCancelRequestSigner } from "../../../eip712";
-import { findCancellations, insertCancellation } from "../../../persistence/mongodb";
+import { cancelOrder } from "../../../features/cancellation";
+import { findCancellations } from "../../../persistence/mongodb";
 import { hashOrders, ValidationError } from "../../../seaport";
+import { ApiError, OrderCancellations } from "../../../types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../../utils/constants";
 import { createLogger } from "../../../utils/logger";
 import { getTimestamp } from "../../../utils/time";
+import {
+  UNSUPPORTED_METHOD_ERROR,
+  INTERNAL_SERVER_ERROR,
+  ILLEGAL_ARGUMENT_ERROR,
+  ORDER_HASHING_ERROR_MESSAGE,
+  UNAUTHORIZED_ERROR,
+} from "../../../validation/errors";
 import { ORDER_CANCELLATION_REQUEST } from "../../../validation/schemas";
 
 const LOGGER = createLogger("cancellations");
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<OrderCancellations | ApiError | null>) {
   try {
     if (req.method === "GET") {
       await handleGet();
@@ -18,18 +27,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     }
 
     if (req.method != "POST") {
-      res.status(501).end();
+      res.status(501).json(UNSUPPORTED_METHOD_ERROR);
       return;
     }
     await handlePost();
   } catch (e) {
     LOGGER.error((e as Error).message);
-    res.status(500).end();
+    res.status(500).json(INTERNAL_SERVER_ERROR);
   }
 
   async function handleGet() {
-    const { lastId } = req.query;
-    const cancellations = await findCancellations(MAX_RETURNED_CANCELLATIONS, lastId?.toString());
+    const { fromTimestamp: fromTimestampString } = req.query;
+    let fromTimestamp;
+    try {
+      fromTimestamp = fromTimestampString ? parseInt(fromTimestampString.toString()) : undefined;
+    } catch (e) {
+      LOGGER.error((e as Error).message);
+      res.status(400).json(ILLEGAL_ARGUMENT_ERROR(`${fromTimestampString} is not a valid timestamp`));
+      return;
+    }
+    const cancellations = await findCancellations(MAX_RETURNED_CANCELLATIONS, getTimestamp(), fromTimestamp);
     res.status(200).json({ cancellations });
   }
 
@@ -39,37 +56,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       data = ORDER_CANCELLATION_REQUEST.parse(req.body);
     } catch (e) {
       LOGGER.error((e as Error).message);
-      res.status(400).end();
+      res.status(400).json(ILLEGAL_ARGUMENT_ERROR(`Body could not be parsed`));
       return;
     }
     const orders = data.orders;
 
-    const [orderHashes, orderSigner, error] = await hashOrders(orders);
+    const { orderHashes, orderSigner, error, erroredOrderHash } = await hashOrders(orders);
 
     if (error != ValidationError.NONE) {
-      res.status(400).end();
+      res.status(400).json(ILLEGAL_ARGUMENT_ERROR(ORDER_HASHING_ERROR_MESSAGE(error, erroredOrderHash)));
       return;
     }
 
-    LOGGER.info(`orderHashes: ${JSON.stringify(orderHashes)}`);
-    LOGGER.info(`orderSigner: ${orderSigner}`);
-
-    const cancelRequestSigner = recoverCancelRequestSigner(orderHashes, data);
-
-    LOGGER.info(`cancelRequestSigner: ${cancelRequestSigner}`);
+    const cancelRequestSigner = recoverCancelRequestSigner(orderHashes!, data);
 
     if (cancelRequestSigner.toUpperCase() != orderSigner?.toUpperCase()) {
       LOGGER.info(`Cancel signer: ${cancelRequestSigner} is not order signer: ${orderSigner}`);
-      res.status(401).end();
+      res.status(401).json(UNAUTHORIZED_ERROR);
       return;
     } else {
-      for (let i = 0; i < orderHashes.length; i++) {
-        const orderHash = orderHashes[i];
+      const cancellations = [];
+      const owner = utils.getAddress(orderSigner);
+
+      for (let i = 0; i < orderHashes!.length; i++) {
+        const orderHash = orderHashes![i];
         LOGGER.info(`Inserting: ${orderHash}`);
-        await insertCancellation({ orderHash, owner: utils.getAddress(orderSigner), timestamp: getTimestamp() });
+        cancellations.push({ orderHash, owner, timestamp: await cancelOrder(owner, orderHash) });
       }
 
-      res.status(200).end();
+      res.status(200).json({ cancellations });
     }
   }
 }

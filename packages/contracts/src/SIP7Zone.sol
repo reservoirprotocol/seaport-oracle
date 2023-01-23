@@ -8,6 +8,12 @@ import { AdvancedOrder, CriteriaResolver, ZoneParameters, Schema } from "./exter
 import { EIP712, ECDSA } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title  SIP07 Zone
+ * @author Tony Snark
+ * @notice Standard implementation of the SIP7 specs with a hook for extensibility via inheritance.
+ * @dev This implementation is not fully gas optimized.
+ */
 contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interface {
     enum SignerStatus {
         NEW,
@@ -15,21 +21,7 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
         REMOVED
     }
 
-    error SignatureExpired(uint256 currentTimestamp, uint256 expiration, bytes32 orderHash);
-    error SignerNotApproved(address signer, bytes32 orderHash);
-    error SignerAlreadyAdded(address signer);
-    error SignerCannotBeReauthorized();
-    error SignerNotActive(address signer);
-
-    error InvalidFulfiller(address fulfiller, address caller, bytes32 orderHash);
-
-    error MissingExtraData();
-    error InvalidExtraData();
-
-    event SignerAdded(address signer);
-    event SignerRemoved(address signer);
-
-    bytes32 public constant ORDER_VALIDITY_HASHTYPE =
+    bytes32 public constant SIGNED_ORDER_HASHTYPE =
         // prettier-ignore
         keccak256(
             abi.encodePacked(
@@ -55,6 +47,7 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
         _sip7APIEndpoint = sip7APIEndpoint;
     }
 
+    ///@inheritdoc SIP7Interface
     function addSigner(address signer) external onlyOwner {
         SignerStatus status = signerStatus[signer];
         if (status == SignerStatus.NEW) {
@@ -67,6 +60,7 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
         }
     }
 
+    ///@inheritdoc SIP7Interface
     function removeSigner(address signer) external onlyOwner {
         SignerStatus status = signerStatus[signer];
         if (status == SignerStatus.AUTHORIZED) {
@@ -77,17 +71,13 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
         }
     }
 
-    /**
-     * @notice Update the API endpoint returned by this zone.
-     *
-     * @param newApiEndpoint The new API endpoint.
-     */
+    ///@inheritdoc SIP7Interface
     function updateAPIEndpoint(string calldata newApiEndpoint) external onlyOwner {
         // Update to the new API endpoint.
         _sip7APIEndpoint = newApiEndpoint;
     }
 
-    // Called by Consideration whenever any extraData is provided by the caller.
+    ///@inheritdoc ZoneInterface
     function validateOrder(ZoneParameters calldata zoneParameters) external view returns (bytes4 validOrderMagicValue) {
         if (zoneParameters.extraData.length < 1) revert MissingExtraData();
         if (zoneParameters.extraData.length < 92) revert InvalidExtraData();
@@ -104,8 +94,15 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
         validOrderMagicValue = ZoneInterface.validateOrder.selector;
     }
 
+    /**
+     * @dev Overridable function for custom context validation.
+     *      It should revert if validation fails.
+     * @param zoneParameters Parameters to validate
+     * @param context Context to validate
+     */
     function _validateContext(ZoneParameters calldata zoneParameters, bytes memory context) internal view virtual {}
 
+    /// @dev It validates expiry and signature
     function _validateSignedOrder(
         address fulfiller,
         uint256 expiration,
@@ -131,15 +128,11 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
     ) internal view returns (bytes32) {
         return
             _hashTypedDataV4(
-                keccak256(abi.encode(ORDER_VALIDITY_HASHTYPE, fulfiller, expiration, orderHash, keccak256(context)))
+                keccak256(abi.encode(SIGNED_ORDER_HASHTYPE, fulfiller, expiration, orderHash, keccak256(context)))
             );
     }
 
-    /**
-     * @notice Returns signing information about the zone.
-     *
-     * @return domainSeparator The domain separator used for signing.
-     */
+    ///@inheritdoc SIP7Interface
     function sip7Information() external view returns (bytes32 domainSeparator, string memory apiEndpoint) {
         // Derive the domain separator.
         domainSeparator = _domainSeparatorV4();
@@ -148,13 +141,7 @@ contract SIP7Zone is ZoneInterface, EIP712, Ownable, SIP7Interface, SIP5Interfac
         apiEndpoint = _sip7APIEndpoint;
     }
 
-    /**
-     * @dev Returns Seaport metadata for this contract, returning the
-     *      contract name and supported schemas.
-     *
-     * @return name    The contract name
-     * @return schemas The supported SIPs
-     */
+    ///@inheritdoc SIP5Interface
     function getSeaportMetadata() external view returns (string memory name, Schema[] memory schemas) {
         name = _zoneName;
         schemas = new Schema[](1);

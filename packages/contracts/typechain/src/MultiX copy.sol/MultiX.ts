@@ -162,7 +162,7 @@ export interface MultiXInterface extends utils.Interface {
   functions: {
     "CONSIDERATION_ITEM_HASHTYPE()": FunctionFragment;
     "CRITERIA_RESOLVER_HASHTYPE()": FunctionFragment;
-    "ORDER_VALIDITY_HASHTYPE()": FunctionFragment;
+    "SIGNED_ORDER_HASHTYPE()": FunctionFragment;
     "isValidOrder(bytes32,address,address,bytes32)": FunctionFragment;
     "isValidOrderIncludingExtraData(bytes32,address,((address,address,(uint8,address,uint256,uint256,uint256)[],(uint8,address,uint256,uint256,uint256,address)[],uint8,uint256,uint256,bytes32,uint256,bytes32,uint256),uint120,uint120,bytes,bytes),bytes32[],(uint256,uint8,uint256,uint256,bytes32[])[])": FunctionFragment;
     "owner()": FunctionFragment;
@@ -176,7 +176,7 @@ export interface MultiXInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "CONSIDERATION_ITEM_HASHTYPE"
       | "CRITERIA_RESOLVER_HASHTYPE"
-      | "ORDER_VALIDITY_HASHTYPE"
+      | "SIGNED_ORDER_HASHTYPE"
       | "isValidOrder"
       | "isValidOrderIncludingExtraData"
       | "owner"
@@ -195,7 +195,7 @@ export interface MultiXInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -241,7 +241,7 @@ export interface MultiXInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "ORDER_VALIDITY_HASHTYPE",
+    functionFragment: "SIGNED_ORDER_HASHTYPE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -314,7 +314,7 @@ export interface MultiX extends BaseContract {
 
     CRITERIA_RESOLVER_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
     isValidOrder(
       arg0: PromiseOrValue<BytesLike>,
@@ -356,7 +356,7 @@ export interface MultiX extends BaseContract {
 
   CRITERIA_RESOLVER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-  ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+  SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
   isValidOrder(
     arg0: PromiseOrValue<BytesLike>,
@@ -396,7 +396,7 @@ export interface MultiX extends BaseContract {
 
     CRITERIA_RESOLVER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<string>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
     isValidOrder(
       arg0: PromiseOrValue<BytesLike>,
@@ -448,7 +448,7 @@ export interface MultiX extends BaseContract {
 
     CRITERIA_RESOLVER_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    ORDER_VALIDITY_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
+    SIGNED_ORDER_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
     isValidOrder(
       arg0: PromiseOrValue<BytesLike>,
@@ -495,7 +495,7 @@ export interface MultiX extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    ORDER_VALIDITY_HASHTYPE(
+    SIGNED_ORDER_HASHTYPE(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

@@ -4,12 +4,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import { hashConsideration, signOrder } from "../../../eip712";
 import { convertSignatureToEIP2098, latestTimestamp } from "../../../eth";
-import { Features } from "../../../features/features";
+import { Features } from "../../../features/Features";
 import { FlaggingChecker } from "../../../features/flagging/FlaggingChecker";
-import { isCancelled } from "../../../persistence/mongodb";
-import { SignedOrder, SignedOrders } from "../../../types/types";
+import { isCancelled, trackSignature } from "../../../persistence/mongodb";
+import { ApiError, SignedOrder, SignedOrders } from "../../../types/types";
 import { EXPIRATION_IN_S } from "../../../utils/constants";
 import { createLogger } from "../../../utils/logger";
+import { UNSUPPORTED_METHOD_ERROR, ILLEGAL_ARGUMENT_ERROR, INTERNAL_SERVER_ERROR } from "../../../validation/errors";
 import { ORDER_SIGNATURE_REQUEST, ORDER_SIGNATURE_REQUEST_ITEM } from "../../../validation/schemas";
 
 const LOGGER = createLogger("sign");
@@ -31,12 +32,12 @@ type SignatureRequestContext = {
   flaggingChecker: FlaggingChecker;
 };
 
-type OrderSignatureRequestItem = z.infer<typeof ORDER_SIGNATURE_REQUEST_ITEM>;
+type SignatureRequestOrder = z.infer<typeof ORDER_SIGNATURE_REQUEST_ITEM>;
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<SignedOrders | null>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<SignedOrders | ApiError | null>) {
   try {
     if (req.method != "POST") {
-      res.status(501).end();
+      res.status(501).json(UNSUPPORTED_METHOD_ERROR);
       return;
     }
 
@@ -46,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       data = ORDER_SIGNATURE_REQUEST.parse(req.body);
     } catch (e) {
       LOGGER.error((e as Error).message);
-      res.status(400).end();
+      res.status(400).json(ILLEGAL_ARGUMENT_ERROR(`Body could not be parsed`));
       return;
     }
 
@@ -57,6 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       expiration,
       flaggingChecker: new FlaggingChecker(orders.map(o => o.consideration ?? [])),
     };
+
     const signedOrders = [];
     for (let i = 0; i < orders.length; i++) {
       signedOrders.push(await processOrder(context, orders[i]));
@@ -65,11 +67,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     res.status(200).json({ orders: signedOrders });
   } catch (e) {
     LOGGER.error((e as Error).message);
-    res.status(500).end();
+    res.status(500).json(INTERNAL_SERVER_ERROR);
   }
 }
 
-async function processOrder(context: SignatureRequestContext, order: OrderSignatureRequestItem): Promise<SignedOrder> {
+async function processOrder(context: SignatureRequestContext, order: SignatureRequestOrder): Promise<SignedOrder> {
   const { orderHash, consideration, fulfiller, zoneHash } = order;
   LOGGER.info(`Processing Order: ${orderHash}`);
 
@@ -90,7 +92,8 @@ async function processOrder(context: SignatureRequestContext, order: OrderSignat
   }
 
   const extraData = await encodeExtraData(fulfiller, context.expiration, orderHash, consideration);
-  return { orderHash, extraData };
+  await trackSignature({ orderHash, expiration: context.expiration });
+  return { orderHash, extraData, expiration: context.expiration };
 }
 
 async function encodeExtraData(

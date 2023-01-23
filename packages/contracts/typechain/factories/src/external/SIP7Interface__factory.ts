@@ -11,6 +11,127 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "InvalidExtraData",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "fulfiller",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "caller",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "orderHash",
+        type: "bytes32",
+      },
+    ],
+    name: "InvalidFulfiller",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MissingExtraData",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "currentTimestamp",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "expiration",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes32",
+        name: "orderHash",
+        type: "bytes32",
+      },
+    ],
+    name: "SignatureExpired",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+    ],
+    name: "SignerAlreadyAdded",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SignerCannotBeReauthorized",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+    ],
+    name: "SignerNotActive",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "orderHash",
+        type: "bytes32",
+      },
+    ],
+    name: "SignerNotApproved",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+    ],
+    name: "SignerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+    ],
+    name: "SignerRemoved",
+    type: "event",
+  },
+  {
     inputs: [
       {
         internalType: "address",

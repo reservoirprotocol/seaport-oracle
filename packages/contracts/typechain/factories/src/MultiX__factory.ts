@@ -183,7 +183,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "ORDER_VALIDITY_HASHTYPE",
+    name: "SIGNED_ORDER_HASHTYPE",
     outputs: [
       {
         internalType: "bytes32",

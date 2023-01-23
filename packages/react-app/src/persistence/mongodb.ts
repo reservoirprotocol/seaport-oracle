@@ -1,9 +1,8 @@
 import { Db, MongoClient, MongoClientOptions } from "mongodb";
-import { OrderCancellation } from "../types/types";
+import { OrderCancellation, SignatureInfo } from "../types/types";
 
 const MONGODB_URI = process.env.MONGO_URL;
 const MONGODB_DB = process.env.DB_NAME ?? "breakwater";
-
 // check the MongoDB URI
 if (!MONGODB_URI) {
   throw new Error("Define the MONGODB_URI environmental variable");
@@ -17,16 +16,19 @@ if (!MONGODB_DB) {
 let cachedClient: MongoClient;
 let cachedDb: Db;
 
-export async function connectToDatabase() {
+export async function connectToDatabase(
+  forceRefresh?: boolean,
+  uri: string = MONGODB_URI!,
+  db_name: string = MONGODB_DB!,
+) {
   // check the cached.
-  if (cachedClient && cachedDb) {
+  if (!forceRefresh && cachedClient && cachedDb) {
     // load from cache
     return {
       client: cachedClient,
       db: cachedDb,
     };
   }
-
   // set the connection options
   const opts = {
     useNewUrlParser: true,
@@ -34,9 +36,9 @@ export async function connectToDatabase() {
   };
 
   // Connect to cluster
-  let client = new MongoClient(MONGODB_URI!!, opts as MongoClientOptions);
+  let client = new MongoClient(uri, opts as MongoClientOptions);
   await client.connect();
-  let db = client.db(MONGODB_DB);
+  let db = client.db(db_name);
 
   // set cache
   cachedClient = client;
@@ -48,36 +50,54 @@ export async function connectToDatabase() {
   };
 }
 
+const createTTLIndex = async (db: Db) => {
+  const signatureCollection = db.collection("signatures");
+  // create a background index on the expireAt field
+  await signatureCollection.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 });
+  console.log("createTTLIndex Done!");
+};
+
 export async function insertCancellation(cancellation: OrderCancellation) {
   const { db } = await connectToDatabase();
-  const collection = db.collection("cancellations");
+  const collection = db.collection<OrderCancellation>("cancellations");
   const cancellationFound = await collection.findOne({ orderHash: cancellation.orderHash });
   if (!cancellationFound) {
-    collection.insertOne(cancellation);
+    await collection.insertOne(cancellation);
   }
 }
 
 export async function isCancelled(orderHash: string): Promise<boolean> {
   const { db } = await connectToDatabase();
-  const cancellation = await db.collection("cancellations").findOne({ orderHash });
+  const cancellation = await db.collection<OrderCancellation>("cancellations").findOne({ orderHash });
   return !!cancellation;
 }
 
-export async function findCancellations(limit: number, lastId?: string) {
+export async function findCancellations(limit: number, currentTimestamp: number, fromTimestamp?: number) {
   const { db } = await connectToDatabase();
-  const collection = db.collection("cancellations");
+  const collection = db.collection<OrderCancellation>("cancellations");
   let query;
-  if (lastId) {
-    query = collection.find({ _id: { $gt: lastId } });
+  if (fromTimestamp) {
+    query = collection.find({ timestamp: { $gt: fromTimestamp, $lt: currentTimestamp } });
   } else {
     query = collection.find({});
   }
-  return await query.sort({ _id: 1 }).limit(limit).toArray();
+  return await query.sort({ timestamp: 1, orderHash: 1 }).limit(limit).toArray();
 }
 
-export async function isFlagged(token: string, identifier: string): Promise<boolean> {
+export async function trackSignature(signatureInfo: SignatureInfo) {
   const { db } = await connectToDatabase();
-  const collection = db.collection("blacklist");
-  const count = await collection.count({ token, identifier });
-  return count > 0;
+  const collection = db.collection<SignatureInfo>("signatures");
+  await collection.updateOne(
+    { orderHash: signatureInfo.orderHash },
+    // expireAt is used to support a TTL index
+    { $set: { expiration: signatureInfo.expiration, expireAt: new Date(signatureInfo.expiration) } },
+    { upsert: true },
+  );
+}
+
+export async function getSignatureTrackingExpiration(orderHash: string): Promise<number | undefined> {
+  const { db } = await connectToDatabase();
+  const collection = db.collection<SignatureInfo>("signatures");
+  const signatureInfo = await collection.findOne({ orderHash });
+  return signatureInfo?.expiration;
 }

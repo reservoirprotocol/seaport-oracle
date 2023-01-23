@@ -8,6 +8,11 @@ import { EIP712, ECDSA } from "@openzeppelin/contracts/utils/cryptography/EIP712
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { SIP7Zone } from "./SIP7Zone.sol";
 
+/**
+ * @title  Breakwater Zone
+ * @author Tony Snark
+ * @notice Custom SIP7 zone which validates received items
+ */
 contract Breakwater is SIP7Zone {
     error InvalidConsideration();
     error InvalidContext();
@@ -42,6 +47,10 @@ contract Breakwater is SIP7Zone {
         string memory sip7APIEndpoint
     ) SIP7Zone(name, version, sip7APIEndpoint) {}
 
+    /**
+     * @dev This function validates the context by making sure it contains
+     *      the EIP712 hash of the array of received items.
+     */
     function _validateContext(ZoneParameters calldata zoneParameters, bytes memory context)
         internal
         view

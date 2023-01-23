@@ -33,18 +33,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ZoneInterface__factory>;
     getContractFactory(
-      name: "IBreakwater",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IBreakwater__factory>;
-    getContractFactory(
-      name: "IMultiX",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IMultiX__factory>;
-    getContractFactory(
-      name: "SIP07Zone",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SIP07Zone__factory>;
-    getContractFactory(
       name: "SIP7Zone",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SIP7Zone__factory>;
@@ -74,21 +62,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ZoneInterface>;
-    getContractAt(
-      name: "IBreakwater",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IBreakwater>;
-    getContractAt(
-      name: "IMultiX",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IMultiX>;
-    getContractAt(
-      name: "SIP07Zone",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SIP07Zone>;
     getContractAt(
       name: "SIP7Zone",
       address: string,
