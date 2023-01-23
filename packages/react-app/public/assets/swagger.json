@@ -531,12 +531,6 @@
           },
           "expiration": {
             "type": "number"
-          },
-          "error": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
           }
         },
         "required": ["orderHash"]
