@@ -7,23 +7,27 @@ import { createMocks } from "node-mocks-http";
 import { signCancelRequest } from "../../src/eip712";
 import { chainId } from "../../src/eth";
 import handler from "../../src/pages/api/cancellations";
-import * as mongo from "../../src/persistence/mongodb";
 import { MAX_RETURNED_CANCELLATIONS } from "../../src/utils/constants";
-import * as time from "../../src/utils/time";
 import { SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";
 import { mockOrders } from "../utils/mocks";
+import * as mongo from "../../src/persistence/mongodb";
+import * as time from "../../src/utils/time";
 
 jest.mock("../../src/utils/time", () => ({
   getTimestamp: jest.fn(),
 }));
 
 jest.mock("../../src/persistence/mongodb", () => ({
+  getSignatureTrackingExpiration: jest.fn(),
   findCancellations: jest.fn(),
   isCancelled: jest.fn(),
   insertCancellation: jest.fn(),
 }));
 
 const mockedGetTimestamp = time.getTimestamp as unknown as jest.Mock<typeof time.getTimestamp>;
+const mockedGetSignatureTrackingExpiration = mongo.getSignatureTrackingExpiration as unknown as jest.Mock<
+  typeof mongo.getSignatureTrackingExpiration
+>;
 const mockedFindCancellations = mongo.findCancellations as unknown as jest.Mock<typeof mongo.findCancellations>;
 const mockedIsCancelled = mongo.isCancelled as unknown as jest.Mock<typeof mongo.isCancelled>;
 const mockedInsertCancellation = mongo.insertCancellation as unknown as jest.Mock<typeof mongo.insertCancellation>;
@@ -40,6 +44,7 @@ describe("Cancellation API", () => {
 
   afterEach(() => {
     mockedGetTimestamp.mockRestore();
+    mockedGetSignatureTrackingExpiration.mockRestore();
     mockedFindCancellations.mockRestore();
     mockedIsCancelled.mockRestore();
     mockedInsertCancellation.mockRestore();
@@ -71,7 +76,10 @@ describe("Cancellation API", () => {
         expect(res._getStatusCode()).toBe(400);
       });
 
-      it("cancels order if owner requests it", async () => {
+      it("cancels order if owner requests it and no active signatures", async () => {
+        const now = 100;
+        //@ts-ignore
+        mockedGetTimestamp.mockReturnValue(now);
         const [orders, orderHashes] = await mockOrders(user1, 1);
 
         const signature = await signCancelRequest(user1, orderHashes);
@@ -84,14 +92,48 @@ describe("Cancellation API", () => {
         await handler(req, res);
         expect(res._getStatusCode()).toBe(200);
         const orderHash = orderHashes[0];
+        const { cancellations } = res._getJSONData();
+        expect(cancellations[0].timestamp).toBe(now);
+        expect(cancellations[0].orderHash).toBe(orderHash);
         expect(mockedInsertCancellation).toHaveBeenCalledWith({
           orderHash,
           owner: user1.address,
-          timestamp: 1,
+          timestamp: now,
+        });
+      });
+
+      it("cancels order with active signatures if owner requests it", async () => {
+        const now = 100;
+        const signatureExpiry = 200;
+        //@ts-ignore
+        mockedGetTimestamp.mockReturnValue(now);
+        //@ts-ignore
+        mockedGetSignatureTrackingExpiration.mockReturnValue(signatureExpiry);
+        const [orders, orderHashes] = await mockOrders(user1, 1);
+
+        const signature = await signCancelRequest(user1, orderHashes);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { signature, orders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(200);
+        const orderHash = orderHashes[0];
+        const { cancellations } = res._getJSONData();
+        expect(cancellations[0].timestamp).toBe(signatureExpiry);
+        expect(cancellations[0].orderHash).toBe(orderHash);
+        expect(mockedInsertCancellation).toHaveBeenCalledWith({
+          orderHash,
+          owner: user1.address,
+          timestamp: signatureExpiry,
         });
       });
 
       it("cancels multiple orders if owner requests it", async () => {
+        //@ts-ignore
+        mockedGetSignatureTrackingExpiration.mockReturnValue(1);
         const [orders, orderHashes] = await mockOrders(user1, 10);
 
         const signature = await signCancelRequest(user1, orderHashes);
@@ -152,10 +194,13 @@ describe("Cancellation API", () => {
 
     describe("GET", () => {
       it("returns last cancellations without cursor", async () => {
+        const now = 200;
         const dbCancellations = ["test"];
         //@ts-ignore
+        mockedGetTimestamp.mockReturnValue(now);
+        //@ts-ignore
         when(mockedFindCancellations)
-          .calledWith(MAX_RETURNED_CANCELLATIONS, undefined)
+          .calledWith(MAX_RETURNED_CANCELLATIONS, now, undefined)
           //@ts-ignore
           .mockReturnValue(dbCancellations);
 
@@ -169,17 +214,20 @@ describe("Cancellation API", () => {
       });
 
       it("returns last cancellations with cursor", async () => {
+        const now = 200;
         const dbCancellations = ["test"];
-        const cursor = "100";
+        const cursor = 100;
+        //@ts-ignore
+        mockedGetTimestamp.mockReturnValue(now);
         //@ts-ignore
         when(mockedFindCancellations)
-          .calledWith(MAX_RETURNED_CANCELLATIONS, cursor)
+          .calledWith(MAX_RETURNED_CANCELLATIONS, now, cursor)
           //@ts-ignore
           .mockReturnValue(dbCancellations);
 
         const { req, res } = createMocks({
           method: "GET",
-          query: { lastId: cursor },
+          query: { fromTimestamp: cursor },
         });
 
         await handler(req, res);

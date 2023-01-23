@@ -16,12 +16,16 @@ jest.mock("../../src/utils/time", () => ({
 }));
 
 jest.mock("../../src/persistence/mongodb", () => ({
+  getSignatureTrackingExpiration: jest.fn(),
   findCancellations: jest.fn(),
   isCancelled: jest.fn(),
   insertCancellation: jest.fn(),
 }));
 
 const mockedGetTimestamp = time.getTimestamp as unknown as jest.Mock<typeof time.getTimestamp>;
+const mockedGetSignatureTrackingExpiration = mongo.getSignatureTrackingExpiration as unknown as jest.Mock<
+  typeof mongo.getSignatureTrackingExpiration
+>;
 const mockedFindCancellations = mongo.findCancellations as unknown as jest.Mock<typeof mongo.findCancellations>;
 const mockedIsCancelled = mongo.isCancelled as unknown as jest.Mock<typeof mongo.isCancelled>;
 const mockedInsertCancellation = mongo.insertCancellation as unknown as jest.Mock<typeof mongo.insertCancellation>;
@@ -37,6 +41,7 @@ describe("Replacement API", () => {
   });
   afterEach(() => {
     mockedGetTimestamp.mockRestore();
+    mockedGetSignatureTrackingExpiration.mockRestore();
     mockedFindCancellations.mockRestore();
     mockedIsCancelled.mockRestore();
     mockedInsertCancellation.mockRestore();
@@ -74,7 +79,10 @@ describe("Replacement API", () => {
         expect(res._getStatusCode()).toBe(400);
       });
 
-      it("replaces order if owner requests it", async () => {
+      it("replaces order if owner requests it and no active signatures", async () => {
+        const now = 100;
+        //@ts-ignore
+        mockedGetTimestamp.mockReturnValue(now);
         const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
         const newOrders = await mockReplacementOrders(user1, hashesToReplace);
 
@@ -85,14 +93,48 @@ describe("Replacement API", () => {
 
         await handler(req, res);
         expect(res._getStatusCode()).toBe(200);
+        const orderHash = hashesToReplace[0];
+        const { cancellations } = res._getJSONData();
+        expect(cancellations[0].timestamp).toBe(now);
+        expect(cancellations[0].orderHash).toBe(orderHash);
         expect(mockedInsertCancellation).toHaveBeenCalledWith({
           orderHash: hashesToReplace[0],
           owner: user1.address,
-          timestamp: 1,
+          timestamp: now,
+        });
+      });
+
+      it("replaces order with active signatures if owner requests it", async () => {
+        const now = 100;
+        const signatureExpiry = 200;
+        //@ts-ignore
+        mockedGetTimestamp.mockReturnValue(now);
+        //@ts-ignore
+        mockedGetSignatureTrackingExpiration.mockReturnValue(signatureExpiry);
+        const [replacedOrders, hashesToReplace] = await mockOrders(user1, 1);
+        const newOrders = await mockReplacementOrders(user1, hashesToReplace);
+
+        const { req, res } = createMocks({
+          method: "POST",
+          body: { newOrders, replacedOrders },
+        });
+
+        await handler(req, res);
+        expect(res._getStatusCode()).toBe(200);
+        const orderHash = hashesToReplace[0];
+        const { cancellations } = res._getJSONData();
+        expect(cancellations[0].timestamp).toBe(signatureExpiry);
+        expect(cancellations[0].orderHash).toBe(orderHash);
+        expect(mockedInsertCancellation).toHaveBeenCalledWith({
+          orderHash: hashesToReplace[0],
+          owner: user1.address,
+          timestamp: signatureExpiry,
         });
       });
 
       it("cancels multiple orders if owner requests it", async () => {
+        //@ts-ignore
+        mockedGetSignatureTrackingExpiration.mockReturnValue(1);
         const [replacedOrders, hashesToReplace] = await mockOrders(user1, 5);
         const newOrders = await mockReplacementOrders(user1, hashesToReplace);
 

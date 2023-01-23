@@ -1,0 +1,570 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Order Signature API",
+    "description": "API for generating and signing orders for a specific marketplace and zone contract",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/cancellations": {
+      "post": {
+        "summary": "Cancel one or multiple orders",
+        "tags": ["Cancellations"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCancellationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCancellations"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get cancelled orders",
+        "tags": ["Cancellations"],
+        "parameters": [
+          {
+            "name": "fromTimestamp",
+            "description": "Sets the earliest timestamp after which cancellations are returned",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCancellations"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/replacements": {
+      "post": {
+        "summary": "Replaces a list of existing orders with new orders",
+        "tags": ["Replacements"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderReplacementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully replaced orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderCancellations"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid arguments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Method not supported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signatures": {
+      "post": {
+        "description": "Generates and signs a set of orders for a specific marketplace and zone contract",
+        "tags": ["Signatures"],
+        "requestBody": {
+          "description": "An object containing an array of orders to be signed",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderSignatureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully generated and signed orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedOrders"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ItemType": {
+        "type": "string",
+        "enum": ["NATIVE", "ERC20", "ERC721", "ERC1155", "ERC721_WITH_CRITERIA", "ERC1155_WITH_CRITERIA"]
+      },
+      "SeaportOrder": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["contract-wide", "single-token", "token-list", "bundle-ask"]
+          },
+          "offerer": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{40}$)"
+          },
+          "zone": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{40}$)"
+          },
+          "offer": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemType": {
+                  "type": "integer",
+                  "maximum": {
+                    "$ref": "#/components/schemas/ItemType"
+                  }
+                },
+                "token": {
+                  "type": "string",
+                  "pattern": "(^0x[A-Fa-f0-9]{40}$)"
+                },
+                "identifierOrCriteria": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "(^0x[A-Fa-f0-9]{1,64}$)"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "(^[0-9]{1,76}$)"
+                    }
+                  ]
+                },
+                "startAmount": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "(^0x[A-Fa-f0-9]{1,64}$)"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "(^[0-9]{1,76}$)"
+                    }
+                  ]
+                },
+                "endAmount": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "(^0x[A-Fa-f0-9]{1,64}$)"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "(^[0-9]{1,76}$)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "consideration": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemType": {
+                  "type": "integer",
+                  "maximum": {
+                    "$ref": "#/components/schemas/ItemType"
+                  }
+                },
+                "token": {
+                  "type": "string",
+                  "pattern": "(^0x[A-Fa-f0-9]{40}$)"
+                },
+                "identifierOrCriteria": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "(^0x[A-Fa-f0-9]{1,64}$)"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "(^[0-9]{1,76}$)"
+                    }
+                  ]
+                },
+                "startAmount": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "(^0x[A-Fa-f0-9]{1,64}$)"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "(^[0-9]{1,76}$)"
+                    }
+                  ]
+                },
+                "endAmount": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "(^0x[A-Fa-f0-9]{1,64}$)"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "(^[0-9]{1,76}$)"
+                    }
+                  ]
+                },
+                "recipient": {
+                  "type": "string",
+                  "pattern": "(^0x[A-Fa-f0-9]{40}$)"
+                }
+              }
+            }
+          },
+          "orderType": {
+            "type": "integer"
+          },
+          "startTime": {
+            "type": "number"
+          },
+          "endTime": {
+            "type": "number"
+          },
+          "zoneHash": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{64}$)"
+          },
+          "salt": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{1,64}$)|(^[0-9]{1,76}$)"
+          },
+          "conduitKey": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{64}$)"
+          },
+          "counter": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{1,64}$)|(^[0-9]{1,76}$)"
+          },
+          "signature": {
+            "type": "string"
+          }
+        }
+      },
+      "OrderCancellation": {
+        "type": "object",
+        "properties": {
+          "orderHash": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "number"
+          }
+        }
+      },
+      "OrderCancellations": {
+        "type": "object",
+        "properties": {
+          "cancellations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderCancellation"
+            }
+          }
+        }
+      },
+      "OrderCancellationRequest": {
+        "type": "object",
+        "properties": {
+          "signature": {
+            "type": "string"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeaportOrder"
+            }
+          }
+        }
+      },
+      "OrderReplacementRequest": {
+        "type": "object",
+        "properties": {
+          "replacedOrders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeaportOrder"
+            },
+            "minItems": 1
+          },
+          "newOrders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeaportOrder"
+            },
+            "minItems": 1
+          }
+        },
+        "required": ["replacedOrders", "newOrders"]
+      },
+      "ReceivedItem": {
+        "type": "object",
+        "properties": {
+          "itemType": {
+            "type": "integer",
+            "description": "The type of item being received"
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{40}$",
+            "description": "The address of the token being received"
+          },
+          "identifier": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{1,64}$|^[0-9]{1,76}$",
+            "description": "The identifier of the item being received"
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{1,64}$|^[0-9]{1,76}$",
+            "description": "The amount of the item being received"
+          },
+          "recipient": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{40}$",
+            "description": "The address of the recipient of the item"
+          }
+        }
+      },
+      "OrderSignatureRequest": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderSignatureRequestItem"
+            }
+          }
+        }
+      },
+      "OrderSignatureRequestItem": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string",
+            "description": "The id of the Ethereum chain the order is being signed for"
+          },
+          "fulfiller": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{40}$",
+            "description": "The Ethereum address of the fulfiller"
+          },
+          "zoneContract": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{40}$",
+            "description": "The Ethereum address of the zone contract"
+          },
+          "marketplaceContract": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{40}$",
+            "description": "The Ethereum address of the marketplace contract"
+          },
+          "zoneHash": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{64}$",
+            "description": "The hash of the zone"
+          },
+          "orderHash": {
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{64}$",
+            "description": "The hash of the order"
+          },
+          "consideration": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ReceivedItem" },
+            "description": "The items being received in return for fulfilling the order"
+          }
+        }
+      },
+      "SignedOrder": {
+        "type": "object",
+        "properties": {
+          "orderHash": {
+            "type": "string"
+          },
+          "extraData": {
+            "type": "string"
+          },
+          "expiration": {
+            "type": "number"
+          },
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["orderHash"]
+      },
+      "SignedOrders": {
+        "type": "object",
+        "properties": {
+          "signedOrders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignedOrder"
+            }
+          }
+        },
+        "required": ["signedOrders"]
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["error", "message"]
+      }
+    }
+  }
+}

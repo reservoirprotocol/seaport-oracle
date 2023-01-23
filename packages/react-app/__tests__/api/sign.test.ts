@@ -3,7 +3,7 @@ import { when } from "jest-when";
 import { createMocks } from "node-mocks-http";
 import { hashConsideration, recoverOrderSigner } from "../../src/eip712";
 import { wallet } from "../../src/eth";
-import handler from "../../src/pages/api/sign/";
+import handler from "../../src/pages/api/signatures";
 import * as mongo from "../../src/persistence/mongodb";
 import * as reservoir from "../../src/reservoir";
 import { mockOrderSignatureRequest } from "../utils/mocks";
@@ -13,12 +13,14 @@ jest.mock("../../src/reservoir", () => ({
 }));
 
 jest.mock("../../src/persistence/mongodb", () => ({
+  trackSignature: jest.fn(),
   findCancellations: jest.fn(),
   isCancelled: jest.fn(),
   insertCancellation: jest.fn(),
 }));
 
 const mockedFetchFlagged = reservoir.fetchFlagged as unknown as jest.Mock<typeof reservoir.fetchFlagged>;
+const mockedTrackSignature = mongo.trackSignature as unknown as jest.Mock<typeof mongo.trackSignature>;
 const mockedGetCancellations = mongo.findCancellations as unknown as jest.Mock<typeof mongo.findCancellations>;
 const mockedIsCancelled = mongo.isCancelled as unknown as jest.Mock<typeof mongo.isCancelled>;
 const mockedInsertCancellation = mongo.insertCancellation as unknown as jest.Mock<typeof mongo.insertCancellation>;
@@ -27,12 +29,13 @@ const chainId = parseFloat(process.env.NEXT_PUBLIC_CHAIN_ID ?? "1");
 describe("Sign Order API", () => {
   afterEach(() => {
     mockedFetchFlagged.mockRestore();
+    mockedTrackSignature.mockRestore();
     mockedGetCancellations.mockRestore();
     mockedIsCancelled.mockRestore();
     mockedInsertCancellation.mockRestore();
   });
 
-  describe("/api/sign", () => {
+  describe("/api/signatures", () => {
     it("returns signature for non cancelled single order", async () => {
       const mockedOrders = await mockOrderSignatureRequest(1);
       const { fulfiller, orderHash, consideration } = mockedOrders[0];
@@ -61,6 +64,7 @@ describe("Sign Order API", () => {
 
       expect(signer).toBe(wallet.address);
       expect(mockedIsCancelled).toHaveBeenCalledWith(orderHash);
+      expect(mockedTrackSignature).toHaveBeenCalledWith({ orderHash: order.orderHash, expiration: order.expiration });
     });
 
     it("returns signature for non cancelled multiple orders", async () => {
@@ -90,6 +94,10 @@ describe("Sign Order API", () => {
 
         expect(signer).toBe(wallet.address);
         expect(mockedIsCancelled).toHaveBeenCalledWith(orderHash);
+        expect(mockedTrackSignature).toHaveBeenCalledWith({
+          orderHash,
+          expiration: order.expiration,
+        });
       }
     });
 
