@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy("Breakwater", {
     from: deployer,
     log: true,
-    args: ["Breakwater", "1.0.0", ""], //TODO add proper api endpoint
+    args: ["Breakwater", "1.0.0", "", ""], //TODO add proper api endpoints
   });
   return true;
 };

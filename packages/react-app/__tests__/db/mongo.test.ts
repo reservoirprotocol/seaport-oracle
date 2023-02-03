@@ -42,8 +42,6 @@ describe("MongoDb", () => {
       const { db } = await connectToDatabase();
       const collection = db.collection("cancellations");
       const foundCancellation = await collection.findOne({ orderHash: cancellation.orderHash });
-      console.log(cancellation);
-
       expect(foundCancellation).toEqual(cancellation);
     });
 

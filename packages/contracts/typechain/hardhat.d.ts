@@ -17,25 +17,41 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
     getContractFactory(
+      name: "Ownable2Step",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable2Step__factory>;
+    getContractFactory(
+      name: "ERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC165__factory>;
+    getContractFactory(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165__factory>;
+    getContractFactory(
       name: "Breakwater",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Breakwater__factory>;
+    getContractFactory(
+      name: "SignedZone",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedZone__factory>;
+    getContractFactory(
+      name: "SignedZoneEventsAndErrors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedZoneEventsAndErrors__factory>;
+    getContractFactory(
+      name: "SignedZoneInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedZoneInterface__factory>;
     getContractFactory(
       name: "SIP5Interface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SIP5Interface__factory>;
     getContractFactory(
-      name: "SIP7Interface",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SIP7Interface__factory>;
-    getContractFactory(
       name: "ZoneInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ZoneInterface__factory>;
-    getContractFactory(
-      name: "SIP7Zone",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SIP7Zone__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -43,30 +59,50 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
     getContractAt(
+      name: "Ownable2Step",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable2Step>;
+    getContractAt(
+      name: "ERC165",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC165>;
+    getContractAt(
+      name: "IERC165",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165>;
+    getContractAt(
       name: "Breakwater",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.Breakwater>;
+    getContractAt(
+      name: "SignedZone",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedZone>;
+    getContractAt(
+      name: "SignedZoneEventsAndErrors",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedZoneEventsAndErrors>;
+    getContractAt(
+      name: "SignedZoneInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedZoneInterface>;
     getContractAt(
       name: "SIP5Interface",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.SIP5Interface>;
     getContractAt(
-      name: "SIP7Interface",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SIP7Interface>;
-    getContractAt(
       name: "ZoneInterface",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.ZoneInterface>;
-    getContractAt(
-      name: "SIP7Zone",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SIP7Zone>;
 
     // default types
     getContractFactory(

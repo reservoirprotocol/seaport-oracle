@@ -2,5 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { SIP5Interface } from "./SIP5Interface";
-export type { SIP7Interface } from "./SIP7Interface";
+export type { SignedZone } from "./SignedZone";
+export type { SignedZoneEventsAndErrors } from "./SignedZoneEventsAndErrors";
+export type { SignedZoneInterface } from "./SignedZoneInterface";
 export type { ZoneInterface } from "./ZoneInterface";

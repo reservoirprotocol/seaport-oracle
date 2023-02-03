@@ -1,7 +1,7 @@
 import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
 import { BigNumberish, BytesLike, Wallet } from "ethers";
-import { _TypedDataEncoder, defaultAbiCoder, verifyTypedData } from "ethers/lib/utils";
-import { wallet, chainId, convertSignatureToEIP2098 } from "../eth";
+import { verifyTypedData, _TypedDataEncoder } from "ethers/lib/utils";
+import { chainId, wallet } from "../eth";
 import {
   CANCEL_REQUEST_EIP712_TYPE,
   CONSIDERATION_EIP712_TYPE,
@@ -45,7 +45,7 @@ export function recoverOrderSigner(
   expiration: BigNumberish,
   orderHash: string,
   context: BytesLike,
-  signature: string,
+  signature: BytesLike,
 ) {
   return verifyTypedData(
     EIP712_DOMAIN(chainId),

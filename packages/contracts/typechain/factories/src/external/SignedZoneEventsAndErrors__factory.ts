@@ -5,9 +5,9 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type {
-  SIP7Interface,
-  SIP7InterfaceInterface,
-} from "../../../src/external/SIP7Interface";
+  SignedZoneEventsAndErrors,
+  SignedZoneEventsAndErrorsInterface,
+} from "../../../src/external/SignedZoneEventsAndErrors";
 
 const _abi = [
   {
@@ -24,6 +24,17 @@ const _abi = [
       },
     ],
     name: "InvalidExtraData",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint8",
+        name: "version",
+        type: "uint8",
+      },
+    ],
+    name: "InvalidExtraDataEncoding",
     type: "error",
   },
   {
@@ -148,74 +159,21 @@ const _abi = [
     name: "SignerRemoved",
     type: "event",
   },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "signer",
-        type: "address",
-      },
-    ],
-    name: "addSigner",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "signer",
-        type: "address",
-      },
-    ],
-    name: "removeSigner",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "sip7Information",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "domainSeparator",
-        type: "bytes32",
-      },
-      {
-        internalType: "string",
-        name: "apiEndpoint",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "newApiEndpoint",
-        type: "string",
-      },
-    ],
-    name: "updateAPIEndpoint",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
 ] as const;
 
-export class SIP7Interface__factory {
+export class SignedZoneEventsAndErrors__factory {
   static readonly abi = _abi;
-  static createInterface(): SIP7InterfaceInterface {
-    return new utils.Interface(_abi) as SIP7InterfaceInterface;
+  static createInterface(): SignedZoneEventsAndErrorsInterface {
+    return new utils.Interface(_abi) as SignedZoneEventsAndErrorsInterface;
   }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider
-  ): SIP7Interface {
-    return new Contract(address, _abi, signerOrProvider) as SIP7Interface;
+  ): SignedZoneEventsAndErrors {
+    return new Contract(
+      address,
+      _abi,
+      signerOrProvider
+    ) as SignedZoneEventsAndErrors;
   }
 }

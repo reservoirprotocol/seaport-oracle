@@ -246,10 +246,7 @@
               "type": "object",
               "properties": {
                 "itemType": {
-                  "type": "integer",
-                  "maximum": {
-                    "$ref": "#/components/schemas/ItemType"
-                  }
+                  "$ref": "#/components/schemas/ItemType"
                 },
                 "token": {
                   "type": "string",
@@ -300,10 +297,7 @@
               "type": "object",
               "properties": {
                 "itemType": {
-                  "type": "integer",
-                  "maximum": {
-                    "$ref": "#/components/schemas/ItemType"
-                  }
+                  "$ref": "#/components/schemas/ItemType"
                 },
                 "token": {
                   "type": "string",
@@ -481,6 +475,32 @@
           }
         }
       },
+      "SubstandardId3Request": {
+        "type": "object",
+        "properties": {
+          "requestedReceivedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivedItem"
+            }
+          }
+        }
+      },
+      "SubstandardId3Response": {
+        "type": "object",
+        "properties": {
+          "requiredReceivedItemsHash": {
+            "type": "string",
+            "pattern": "(^0x[A-Fa-f0-9]{64}$)"
+          },
+          "requiredReceivedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivedItem"
+            }
+          }
+        }
+      },
       "OrderSignatureRequestItem": {
         "type": "object",
         "properties": {
@@ -488,34 +508,23 @@
             "type": "string",
             "description": "The id of the Ethereum chain the order is being signed for"
           },
-          "fulfiller": {
-            "type": "string",
-            "pattern": "^0x[A-Fa-f0-9]{40}$",
-            "description": "The Ethereum address of the fulfiller"
-          },
-          "zoneContract": {
-            "type": "string",
-            "pattern": "^0x[A-Fa-f0-9]{40}$",
-            "description": "The Ethereum address of the zone contract"
-          },
           "marketplaceContract": {
             "type": "string",
             "pattern": "^0x[A-Fa-f0-9]{40}$",
             "description": "The Ethereum address of the marketplace contract"
           },
-          "zoneHash": {
-            "type": "string",
-            "pattern": "^0x[A-Fa-f0-9]{64}$",
-            "description": "The hash of the zone"
+          "orderParameters": {
+            "$ref": "#/components/schemas/SeaportOrder",
+            "description": "Parameters of the order to fulfill"
           },
-          "orderHash": {
+          "fulfiller": {
             "type": "string",
-            "pattern": "^0x[A-Fa-f0-9]{64}$",
-            "description": "The hash of the order"
+            "pattern": "^0x[A-Fa-f0-9]{40}$",
+            "description": "The Ethereum address of the fulfiller"
           },
-          "consideration": {
+          "substandardRequests": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/ReceivedItem" },
+            "items": { "$ref": "#/components/schemas/SubstandardId3Request" },
             "description": "The items being received in return for fulfilling the order"
           }
         }
@@ -523,14 +532,18 @@
       "SignedOrder": {
         "type": "object",
         "properties": {
-          "orderHash": {
-            "type": "string"
+          "orderParameters": {
+            "$ref": "#/components/schemas/SeaportOrder",
+            "description": "Parameters of the order to fulfill"
           },
-          "extraData": {
-            "type": "string"
+          "extraDataComponent": {
+            "type": "string",
+            "description": "Extra data to provide to fulfill the order"
           },
-          "expiration": {
-            "type": "number"
+          "substandardResponses": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SubstandardId3Response" },
+            "description": "The items being received in return for fulfilling the order and their hash"
           }
         },
         "required": ["orderHash"]

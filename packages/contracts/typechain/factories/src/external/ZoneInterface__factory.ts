@@ -11,6 +11,36 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "getSeaportMetadata",
+    outputs: [
+      {
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "id",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "metadata",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct Schema[]",
+        name: "schemas",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         components: [

@@ -4,4 +4,3 @@
 import type * as external from "./external";
 export type { external };
 export type { Breakwater } from "./Breakwater";
-export type { SIP7Zone } from "./SIP7Zone";

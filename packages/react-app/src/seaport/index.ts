@@ -17,6 +17,11 @@ export type HashingResult = {
   erroredOrderHash?: string;
 };
 
+export function hashOrder(orderData: OrderComponents) {
+  const order = new Sdk.Seaport.Order(chainId, orderData);
+  return order.hash();
+}
+
 export async function hashOrders(orders: OrderComponents[]): Promise<HashingResult> {
   let orderSigner: string = "";
   const orderHashes = [];

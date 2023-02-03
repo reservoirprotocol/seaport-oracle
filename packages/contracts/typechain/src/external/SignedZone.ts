@@ -25,7 +25,7 @@ import type {
   TypedListener,
   OnEvent,
   PromiseOrValue,
-} from "../common";
+} from "../../common";
 
 export type SchemaStruct = {
   id: PromiseOrValue<BigNumberish>;
@@ -110,12 +110,8 @@ export type ZoneParametersStructOutput = [
   zoneHash: string;
 };
 
-export interface BreakwaterInterface extends utils.Interface {
+export interface SignedZoneInterface extends utils.Interface {
   functions: {
-    "CONSIDERATION_BYTES()": FunctionFragment;
-    "CONSIDERATION_HASHTYPE()": FunctionFragment;
-    "RECEIVED_ITEM_BYTES()": FunctionFragment;
-    "RECEIVED_ITEM_HASHTYPE()": FunctionFragment;
     "acceptOwnership()": FunctionFragment;
     "addSigner(address)": FunctionFragment;
     "getActiveSigners()": FunctionFragment;
@@ -133,10 +129,6 @@ export interface BreakwaterInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "CONSIDERATION_BYTES"
-      | "CONSIDERATION_HASHTYPE"
-      | "RECEIVED_ITEM_BYTES"
-      | "RECEIVED_ITEM_HASHTYPE"
       | "acceptOwnership"
       | "addSigner"
       | "getActiveSigners"
@@ -152,22 +144,6 @@ export interface BreakwaterInterface extends utils.Interface {
       | "validateOrder"
   ): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "CONSIDERATION_BYTES",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "CONSIDERATION_HASHTYPE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "RECEIVED_ITEM_BYTES",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "RECEIVED_ITEM_HASHTYPE",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "acceptOwnership",
     values?: undefined
@@ -218,22 +194,6 @@ export interface BreakwaterInterface extends utils.Interface {
     values: [ZoneParametersStruct]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "CONSIDERATION_BYTES",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "CONSIDERATION_HASHTYPE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "RECEIVED_ITEM_BYTES",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "RECEIVED_ITEM_HASHTYPE",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "acceptOwnership",
     data: BytesLike
@@ -345,12 +305,12 @@ export type SignerRemovedEvent = TypedEvent<[string], SignerRemovedEventObject>;
 
 export type SignerRemovedEventFilter = TypedEventFilter<SignerRemovedEvent>;
 
-export interface Breakwater extends BaseContract {
+export interface SignedZone extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: BreakwaterInterface;
+  interface: SignedZoneInterface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -372,14 +332,6 @@ export interface Breakwater extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    CONSIDERATION_BYTES(overrides?: CallOverrides): Promise<[string]>;
-
-    CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
-
-    RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<[string]>;
-
-    RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
-
     acceptOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -447,14 +399,6 @@ export interface Breakwater extends BaseContract {
     ): Promise<[string] & { validOrderMagicValue: string }>;
   };
 
-  CONSIDERATION_BYTES(overrides?: CallOverrides): Promise<string>;
-
-  CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<string>;
-
-  RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<string>;
-
-  RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
-
   acceptOwnership(
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -520,14 +464,6 @@ export interface Breakwater extends BaseContract {
   ): Promise<string>;
 
   callStatic: {
-    CONSIDERATION_BYTES(overrides?: CallOverrides): Promise<string>;
-
-    CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<string>;
-
-    RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<string>;
-
-    RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
-
     acceptOwnership(overrides?: CallOverrides): Promise<void>;
 
     addSigner(
@@ -619,14 +555,6 @@ export interface Breakwater extends BaseContract {
   };
 
   estimateGas: {
-    CONSIDERATION_BYTES(overrides?: CallOverrides): Promise<BigNumber>;
-
-    CONSIDERATION_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    RECEIVED_ITEM_BYTES(overrides?: CallOverrides): Promise<BigNumber>;
-
-    RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
-
     acceptOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -677,22 +605,6 @@ export interface Breakwater extends BaseContract {
   };
 
   populateTransaction: {
-    CONSIDERATION_BYTES(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    CONSIDERATION_HASHTYPE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    RECEIVED_ITEM_BYTES(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    RECEIVED_ITEM_HASHTYPE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     acceptOwnership(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

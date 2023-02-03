@@ -1,7 +1,15 @@
+import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
+import { BytesLike } from "ethers";
+
 export type SignedOrder = {
-  orderHash: string;
-  extraData?: string;
-  expiration?: number;
+  extraDataComponent?: BytesLike;
+  orderParameters?: OrderComponents;
+  substandardResponses?: [
+    {
+      requiredReceivedItems: ReceivedItem[];
+      requiredReceivedItemsHash: BytesLike;
+    },
+  ];
   error?: string;
   message?: string;
 };

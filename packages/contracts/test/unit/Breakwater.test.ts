@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { constants, utils, Wallet } from "ethers";
-import { BytesLike, defaultAbiCoder, keccak256, _TypedDataEncoder } from "ethers/lib/utils";
+import { BytesLike, keccak256, _TypedDataEncoder } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { ReceivedItemStruct, ZoneParametersStruct } from "../../typechain/src/Breakwater";
 import { Contracts, setupContracts, User } from "../fixtures/contracts";
@@ -59,7 +59,7 @@ describe("Breakwater", function () {
       await expect(deployer.Breakwater.addSigner(users[8].address))
         .to.emit(contracts.Breakwater, "SignerAdded")
         .withArgs(users[8].address);
-      expect(await deployer.Breakwater.signerStatus(users[8].address)).to.be.equal(1);
+      expect(await deployer.Breakwater.getActiveSigners()).to.contain(users[8].address);
     });
 
     it("reverts when adding signer twice", async function () {
@@ -84,13 +84,13 @@ describe("Breakwater", function () {
       await expect(deployer.Breakwater.removeSigner(users[8].address))
         .to.emit(contracts.Breakwater, "SignerRemoved")
         .withArgs(users[8].address);
-      expect(await deployer.Breakwater.signerStatus(users[8].address)).to.be.equal(2);
+      expect(await deployer.Breakwater.getActiveSigners()).to.be.empty;
     });
 
     it("reverts when removing new signer", async function () {
       await expect(deployer.Breakwater.removeSigner(users[8].address)).to.be.revertedWithCustomError(
         contracts.Breakwater,
-        "SignerNotActive",
+        "SignerNotPresent",
       );
     });
 
@@ -99,7 +99,7 @@ describe("Breakwater", function () {
       await deployer.Breakwater.removeSigner(users[8].address);
       await expect(deployer.Breakwater.removeSigner(users[8].address)).to.be.revertedWithCustomError(
         contracts.Breakwater,
-        "SignerNotActive",
+        "SignerNotPresent",
       );
     });
   });
@@ -115,7 +115,7 @@ describe("Breakwater", function () {
     it("reverts without extra data", async function () {
       await expect(
         contracts.Breakwater.validateOrder(mockZoneParameter(keccak256("0x1234"), constants.AddressZero, [])),
-      ).to.be.revertedWithCustomError(contracts.Breakwater, "MissingExtraData");
+      ).to.be.revertedWithCustomError(contracts.Breakwater, "InvalidExtraData");
     });
 
     it("reverts with small extra data", async function () {
@@ -126,7 +126,7 @@ describe("Breakwater", function () {
 
     it("reverts with invalid fulfiller", async function () {
       const orderHash = keccak256("0x1234");
-      const expiration = await getCurrentTimeStamp();
+      const expiration = (await getCurrentTimeStamp()) + 100;
       const fulfiller = Wallet.createRandom().address;
       const context = constants.HashZero;
       const signedOrder = {
@@ -142,7 +142,7 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
         [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
       );
@@ -170,7 +170,7 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
         [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
       );
@@ -184,7 +184,7 @@ describe("Breakwater", function () {
 
     it("reverts when signer not correct", async function () {
       const orderHash = keccak256("0x1234");
-      const expiration = await getCurrentTimeStamp();
+      const expiration = (await getCurrentTimeStamp()) + 100;
       const fulfiller = constants.AddressZero;
       const context = constants.HashZero;
       const signedOrder = {
@@ -200,14 +200,14 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
         [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
       );
 
       await expect(
         contracts.Breakwater.validateOrder(mockZoneParameter(orderHash, constants.AddressZero, extraData)),
-      ).to.be.revertedWithCustomError(contracts.Breakwater, "SignerNotApproved");
+      ).to.be.revertedWithCustomError(contracts.Breakwater, "SignerNotActive");
     });
 
     it("reverts with invalid signature format", async function () {
@@ -228,9 +228,9 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [0, fulfiller, expiration, signature, context],
+        [0, fulfiller, expiration, signature.substring(0, 62), context],
       );
 
       await expect(
@@ -256,17 +256,17 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
         [1, fulfiller, expiration, signature, context],
       );
 
       await expect(
         contracts.Breakwater.validateOrder(mockZoneParameter(orderHash, constants.AddressZero, extraData)),
-      ).to.be.revertedWithCustomError(contracts.Breakwater, "InvalidExtraData");
+      ).to.be.revertedWithCustomError(contracts.Breakwater, "InvalidExtraDataEncoding");
     });
 
-    it("validates correct signature without context", async function () {
+    it("reverts without context", async function () {
       const orderHash = keccak256("0x1234");
       const expiration = (await getCurrentTimeStamp()) + 100;
       const fulfiller = constants.AddressZero;
@@ -284,14 +284,14 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
         [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
       );
 
-      expect(
-        await contracts.Breakwater.validateOrder(mockZoneParameter(orderHash, constants.AddressZero, extraData)),
-      ).to.be.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
+      await expect(
+        contracts.Breakwater.validateOrder(mockZoneParameter(orderHash, constants.AddressZero, extraData)),
+      ).to.be.revertedWithCustomError(contracts.Breakwater, "InvalidContext");
     });
 
     it("validates correct signature with context", async function () {
@@ -303,7 +303,7 @@ describe("Breakwater", function () {
         consideration,
       });
 
-      const context: BytesLike = considerationHash;
+      const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [0, considerationHash]);
 
       const signedOrder = {
         fulfiller,
@@ -318,7 +318,7 @@ describe("Breakwater", function () {
         signedOrder,
       );
 
-      const extraData = defaultAbiCoder.encode(
+      const extraData = utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
         [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
       );
@@ -328,6 +328,40 @@ describe("Breakwater", function () {
           mockZoneParameter(orderHash, constants.AddressZero, extraData, consideration),
         ),
       ).to.be.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
+    });
+
+    it("reverts with wrong SIP6 version for context", async function () {
+      const orderHash = keccak256("0x1234");
+      const expiration = (await getCurrentTimeStamp()) + 100;
+      const fulfiller = constants.AddressZero;
+      const consideration = mockConsideration();
+      const considerationHash = _TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
+
+      const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [2, considerationHash]);
+
+      const signedOrder = {
+        fulfiller,
+        expiration,
+        orderHash,
+        context,
+      };
+
+      const signature = await signer._signTypedData(
+        EIP712_DOMAIN(1, contracts.Breakwater.address),
+        SIGNED_ORDER_EIP712_TYPE,
+        signedOrder,
+      );
+
+      const extraData = utils.solidityPack(
+        ["bytes1", "address", "uint64", "bytes", "bytes"],
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
+      );
+
+      await expect(
+        contracts.Breakwater.validateOrder(mockZoneParameter(orderHash, constants.AddressZero, extraData)),
+      ).to.be.revertedWithCustomError(contracts.Breakwater, "InvalidExtraDataEncoding");
     });
   });
 });

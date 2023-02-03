@@ -23,6 +23,16 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export type SchemaStruct = {
+  id: PromiseOrValue<BigNumberish>;
+  metadata: PromiseOrValue<BytesLike>;
+};
+
+export type SchemaStructOutput = [BigNumber, string] & {
+  id: BigNumber;
+  metadata: string;
+};
+
 export type SpentItemStruct = {
   itemType: PromiseOrValue<BigNumberish>;
   token: PromiseOrValue<string>;
@@ -98,16 +108,27 @@ export type ZoneParametersStructOutput = [
 
 export interface ZoneInterfaceInterface extends utils.Interface {
   functions: {
+    "getSeaportMetadata()": FunctionFragment;
     "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: "validateOrder"): FunctionFragment;
+  getFunction(
+    nameOrSignatureOrTopic: "getSeaportMetadata" | "validateOrder"
+  ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "getSeaportMetadata",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "validateOrder",
     values: [ZoneParametersStruct]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "getSeaportMetadata",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "validateOrder",
     data: BytesLike
@@ -143,11 +164,29 @@ export interface ZoneInterface extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    getSeaportMetadata(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, SchemaStructOutput[]] & {
+        name: string;
+        schemas: SchemaStructOutput[];
+      }
+    >;
+
     validateOrder(
       zoneParameters: ZoneParametersStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
+
+  getSeaportMetadata(
+    overrides?: CallOverrides
+  ): Promise<
+    [string, SchemaStructOutput[]] & {
+      name: string;
+      schemas: SchemaStructOutput[];
+    }
+  >;
 
   validateOrder(
     zoneParameters: ZoneParametersStruct,
@@ -155,6 +194,15 @@ export interface ZoneInterface extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    getSeaportMetadata(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, SchemaStructOutput[]] & {
+        name: string;
+        schemas: SchemaStructOutput[];
+      }
+    >;
+
     validateOrder(
       zoneParameters: ZoneParametersStruct,
       overrides?: CallOverrides
@@ -164,6 +212,8 @@ export interface ZoneInterface extends BaseContract {
   filters: {};
 
   estimateGas: {
+    getSeaportMetadata(overrides?: CallOverrides): Promise<BigNumber>;
+
     validateOrder(
       zoneParameters: ZoneParametersStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -171,6 +221,10 @@ export interface ZoneInterface extends BaseContract {
   };
 
   populateTransaction: {
+    getSeaportMetadata(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     validateOrder(
       zoneParameters: ZoneParametersStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }

@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, BytesLike, utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { ethers } from "hardhat";
 
 export const A_NON_ZERO_ADDRESS = "0x1234000000000000000000000000000000000000";

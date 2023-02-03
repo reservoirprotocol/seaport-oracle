@@ -3,4 +3,3 @@
 /* eslint-disable */
 export * as external from "./external";
 export { Breakwater__factory } from "./Breakwater__factory";
-export { SIP7Zone__factory } from "./SIP7Zone__factory";

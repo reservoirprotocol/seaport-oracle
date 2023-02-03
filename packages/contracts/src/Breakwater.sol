@@ -2,20 +2,24 @@
 pragma solidity 0.8.17;
 
 import { ZoneParameters, ReceivedItem } from "./external/ConsiderationStructs.sol";
-import { ZoneInterface } from "./external/ZoneInterface.sol";
-import { AdvancedOrder, CriteriaResolver } from "./external/ConsiderationStructs.sol";
-import { EIP712, ECDSA } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { SIP7Zone } from "./SIP7Zone.sol";
+import { SignedZone } from "./external/SignedZone.sol";
 
 /**
  * @title  Breakwater Zone
  * @author Tony Snark
  * @notice Custom SIP7 zone which validates received items
  */
-contract Breakwater is SIP7Zone {
+contract Breakwater is SignedZone {
+    /**
+     * @dev Revert with an error if consideration does not match the hash provided.
+     */
     error InvalidConsideration();
+    /**
+     * @dev Revert with an error if the context does not adhere to the standard format.
+     */
     error InvalidContext();
+
+    uint256[] _SUPPORTED_SUBSTANDARDS = [7];
 
     bytes public constant CONSIDERATION_BYTES =
         // prettier-ignore
@@ -44,26 +48,33 @@ contract Breakwater is SIP7Zone {
     constructor(
         string memory name,
         string memory version,
-        string memory sip7APIEndpoint
-    ) SIP7Zone(name, version, sip7APIEndpoint) {}
+        string memory sip7APIEndpoint,
+        string memory documentationURI
+    ) SignedZone(name, version, sip7APIEndpoint, _SUPPORTED_SUBSTANDARDS, documentationURI) {}
 
-    /**
-     * @dev This function validates the context by making sure it contains
-     *      the EIP712 hash of the array of received items.
-     */
-    function _validateContext(ZoneParameters calldata zoneParameters, bytes memory context)
-        internal
+    ///@inheritdoc SignedZone
+    function validateOrder(ZoneParameters calldata zoneParameters)
+        public
         view
-        virtual
         override
+        returns (bytes4 validOrderMagicValue)
     {
-        if (context.length != 32) revert InvalidContext();
-        bytes32 considerationHash = bytes32(context);
+        validOrderMagicValue = super.validateOrder(zoneParameters);
+        bytes calldata extraData = zoneParameters.extraData;
+        // extraData bytes 94-126: Received Items Hash
+        if (extraData.length != 126) revert InvalidContext();
+        // extraData bytes 93-94: SIP-6 version byte (MUST be 0x00)
+        if (extraData[93] != 0x00) {
+            revert InvalidExtraDataEncoding(0x00);
+        }
+        bytes calldata contextPayload = extraData[94:];
+
+        bytes32 considerationHash = bytes32(contextPayload);
         if (_hashConsideration(zoneParameters.consideration) != considerationHash) revert InvalidConsideration();
     }
 
     /// @dev Calculates consideration hash
-    function _hashConsideration(ReceivedItem[] memory consideration) internal pure returns (bytes32) {
+    function _hashConsideration(ReceivedItem[] calldata consideration) internal pure returns (bytes32) {
         uint256 numberOfItems = consideration.length;
         bytes32[] memory considerationHashes = new bytes32[](numberOfItems);
         for (uint256 i; i < numberOfItems; ) {
@@ -76,7 +87,7 @@ contract Breakwater is SIP7Zone {
     }
 
     /// @dev Calculates consideration item hash
-    function _hashReceivedItem(ReceivedItem memory receivedItem) internal pure returns (bytes32) {
+    function _hashReceivedItem(ReceivedItem calldata receivedItem) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(

@@ -2,5 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export { SIP5Interface__factory } from "./SIP5Interface__factory";
-export { SIP7Interface__factory } from "./SIP7Interface__factory";
+export { SignedZone__factory } from "./SignedZone__factory";
+export { SignedZoneEventsAndErrors__factory } from "./SignedZoneEventsAndErrors__factory";
+export { SignedZoneInterface__factory } from "./SignedZoneInterface__factory";
 export { ZoneInterface__factory } from "./ZoneInterface__factory";

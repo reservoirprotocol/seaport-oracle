@@ -60,14 +60,16 @@ export const ORDER_REPLACEMENT_REQUEST = z.object({
   newOrders: z.array(SEAPORT_ORDER_SCHEMA).nonempty(),
 });
 
+export const SUBSTANDARD_3_REQUEST = z.object({
+  requestedReceivedItems: z.array(RECEIVED_ITEM),
+});
+
 export const ORDER_SIGNATURE_REQUEST_ITEM = z.object({
   chainId: z.string(),
   fulfiller: ethAddress,
-  zoneContract: ethAddress,
   marketplaceContract: ethAddress,
-  zoneHash: bytes32,
-  orderHash: bytes32,
-  consideration: z.array(RECEIVED_ITEM),
+  orderParameters: SEAPORT_ORDER_SCHEMA,
+  substandardRequests: z.array(SUBSTANDARD_3_REQUEST).length(1),
 });
 
 export const ORDER_SIGNATURE_REQUEST = z.object({
