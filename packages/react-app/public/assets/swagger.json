@@ -357,11 +357,13 @@
           },
           "zoneHash": {
             "type": "string",
-            "pattern": "(^0x[A-Fa-f0-9]{64}$)"
+            "pattern": "(^0x[A-Fa-f0-9]{64}$)",
+            "description": "The zone hash encodes features activated for this order.\nSupported features are:\n\n1) Flagged Token Protection\n 0x8000000000000000000000000000000000000000000000000000000000000000"
           },
           "salt": {
             "type": "string",
-            "pattern": "(^0x[A-Fa-f0-9]{1,64}$)|(^[0-9]{1,76}$)"
+            "pattern": "(^0x[A-Fa-f0-9]{1,64}$)|(^[0-9]{1,76}$)",
+            "description": "In the context of order replacements if the salt is populated with the hash of a previous order, that order will be cancelled."
           },
           "conduitKey": {
             "type": "string",
@@ -405,7 +407,8 @@
         "type": "object",
         "properties": {
           "signature": {
-            "type": "string"
+            "type": "string",
+            "description": "Signature of the array containing the hashes of each order to cancel."
           },
           "orders": {
             "type": "array",
@@ -491,13 +494,15 @@
         "properties": {
           "requiredReceivedItemsHash": {
             "type": "string",
-            "pattern": "(^0x[A-Fa-f0-9]{64}$)"
+            "pattern": "(^0x[A-Fa-f0-9]{64}$)",
+            "description": "Hash of the array of items used as consideration for the order"
           },
           "requiredReceivedItems": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ReceivedItem"
-            }
+            },
+            "description": "Items used as consideration for the order"
           }
         }
       },
@@ -542,8 +547,7 @@
           },
           "substandardResponses": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/SubstandardId3Response" },
-            "description": "The items being received in return for fulfilling the order and their hash"
+            "items": { "$ref": "#/components/schemas/SubstandardId3Response" }
           }
         },
         "required": ["orderHash"]
@@ -551,14 +555,14 @@
       "SignedOrders": {
         "type": "object",
         "properties": {
-          "signedOrders": {
+          "orders": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SignedOrder"
             }
           }
         },
-        "required": ["signedOrders"]
+        "required": ["orders"]
       },
       "ApiError": {
         "type": "object",

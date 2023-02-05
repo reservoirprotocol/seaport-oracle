@@ -75,7 +75,7 @@ export const convertSignatureToEIP2098 = (signature: string) => {
 };
 
 export const EIP712_DOMAIN = (chainId: number, contract: string) => ({
-  name: "Breakwater",
+  name: "SignedZone",
   version: "1.0.0",
   chainId,
   verifyingContract: contract,

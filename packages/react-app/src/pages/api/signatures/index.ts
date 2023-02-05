@@ -8,7 +8,7 @@ import { convertSignatureToEIP2098, latestTimestamp } from "../../../eth";
 import { Features } from "../../../features/Features";
 import { FlaggingChecker } from "../../../features/flagging/FlaggingChecker";
 import { isCancelled, trackSignature } from "../../../persistence/mongodb";
-import { hashOrder } from "../../../seaport";
+import { hashOrder, SIP6_VERSION } from "../../../seaport";
 import { ApiError, SignedOrder, SignedOrders } from "../../../types/types";
 import { EXPIRATION_IN_S } from "../../../utils/constants";
 import { createLogger } from "../../../utils/logger";
@@ -124,7 +124,7 @@ async function encodeExtraData(
   const signature = await signOrder(fulfiller, expiration, orderHash, context);
   const extraData = utils.solidityPack(
     ["bytes1", "address", "uint64", "bytes", "bytes"],
-    [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
+    [SIP6_VERSION, fulfiller, expiration, convertSignatureToEIP2098(signature), context],
   );
   return [extraData, contextPayload];
 }

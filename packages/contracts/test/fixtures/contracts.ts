@@ -1,11 +1,12 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { Signer, Wallet } from "ethers";
 import { deployments, getNamedAccounts, getUnnamedAccounts } from "hardhat";
-import { Breakwater, Breakwater__factory, IBreakwater, IBreakwater__factory } from "../../typechain";
+import { ZONE_ID } from "../../config";
+import { SignedZone, SignedZoneController, SignedZoneController__factory, SignedZone__factory } from "../../typechain";
 import { setupUser, setupUsers } from "./users";
 
 export interface Contracts {
-  Breakwater: Breakwater;
+  Controller: SignedZoneController;
+  Breakwater: SignedZone;
 }
 
 export interface User extends Contracts {
@@ -16,12 +17,18 @@ export interface User extends Contracts {
 export const setupContracts = deployments.createFixture(async ({ ethers }) => {
   const { deployer } = await getNamedAccounts();
   await deployments.fixture(["Deployment"]);
-  const Breakwater = await deployments.get("Breakwater");
+  const signedZoneController = await deployments.get("SignedZoneController");
   const signer = (await ethers.getSigners())[0];
-  const BreakwaterContract = await Breakwater__factory.connect(Breakwater.address, signer);
+  const signedZoneControllerContract = await SignedZoneController__factory.connect(
+    signedZoneController.address,
+    signer,
+  );
 
+  const zoneAddress = await signedZoneControllerContract.getZone(ZONE_ID(deployer));
+  const breakwaterContract = await SignedZone__factory.connect(zoneAddress, signer);
   const contracts: Contracts = {
-    Breakwater: BreakwaterContract,
+    Controller: signedZoneControllerContract,
+    Breakwater: breakwaterContract,
   };
 
   const users: User[] = await setupUsers(await getUnnamedAccounts(), contracts);

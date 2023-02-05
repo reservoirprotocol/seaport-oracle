@@ -29,13 +29,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
-      name: "Breakwater",
+      name: "ZoneInterface",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Breakwater__factory>;
+    ): Promise<Contracts.ZoneInterface__factory>;
     getContractFactory(
-      name: "SignedZone",
+      name: "SignedZoneControllerEventsAndErrors",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SignedZone__factory>;
+    ): Promise<Contracts.SignedZoneControllerEventsAndErrors__factory>;
+    getContractFactory(
+      name: "SignedZoneControllerInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedZoneControllerInterface__factory>;
     getContractFactory(
       name: "SignedZoneEventsAndErrors",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -49,9 +53,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SIP5Interface__factory>;
     getContractFactory(
-      name: "ZoneInterface",
+      name: "SignedZone",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ZoneInterface__factory>;
+    ): Promise<Contracts.SignedZone__factory>;
+    getContractFactory(
+      name: "SignedZoneController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedZoneController__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -74,15 +82,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
     getContractAt(
-      name: "Breakwater",
+      name: "ZoneInterface",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Breakwater>;
+    ): Promise<Contracts.ZoneInterface>;
     getContractAt(
-      name: "SignedZone",
+      name: "SignedZoneControllerEventsAndErrors",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.SignedZone>;
+    ): Promise<Contracts.SignedZoneControllerEventsAndErrors>;
+    getContractAt(
+      name: "SignedZoneControllerInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedZoneControllerInterface>;
     getContractAt(
       name: "SignedZoneEventsAndErrors",
       address: string,
@@ -99,10 +112,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SIP5Interface>;
     getContractAt(
-      name: "ZoneInterface",
+      name: "SignedZone",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.ZoneInterface>;
+    ): Promise<Contracts.SignedZone>;
+    getContractAt(
+      name: "SignedZoneController",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedZoneController>;
 
     // default types
     getContractFactory(

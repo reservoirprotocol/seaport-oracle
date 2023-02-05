@@ -116,18 +116,9 @@ export interface BreakwaterInterface extends utils.Interface {
     "CONSIDERATION_HASHTYPE()": FunctionFragment;
     "RECEIVED_ITEM_BYTES()": FunctionFragment;
     "RECEIVED_ITEM_HASHTYPE()": FunctionFragment;
-    "acceptOwnership()": FunctionFragment;
     "addSigner(address)": FunctionFragment;
-    "getActiveSigners()": FunctionFragment;
     "getSeaportMetadata()": FunctionFragment;
-    "owner()": FunctionFragment;
-    "pendingOwner()": FunctionFragment;
     "removeSigner(address)": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "sip7Information()": FunctionFragment;
-    "supportsInterface(bytes4)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "updateAPIEndpoint(string)": FunctionFragment;
     "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))": FunctionFragment;
   };
 
@@ -137,18 +128,9 @@ export interface BreakwaterInterface extends utils.Interface {
       | "CONSIDERATION_HASHTYPE"
       | "RECEIVED_ITEM_BYTES"
       | "RECEIVED_ITEM_HASHTYPE"
-      | "acceptOwnership"
       | "addSigner"
-      | "getActiveSigners"
       | "getSeaportMetadata"
-      | "owner"
-      | "pendingOwner"
       | "removeSigner"
-      | "renounceOwnership"
-      | "sip7Information"
-      | "supportsInterface"
-      | "transferOwnership"
-      | "updateAPIEndpoint"
       | "validateOrder"
   ): FunctionFragment;
 
@@ -169,48 +151,15 @@ export interface BreakwaterInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "acceptOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "addSigner",
     values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getActiveSigners",
-    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getSeaportMetadata",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "pendingOwner",
-    values?: undefined
-  ): string;
   encodeFunctionData(
     functionFragment: "removeSigner",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "sip7Information",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "supportsInterface",
-    values: [PromiseOrValue<BytesLike>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "updateAPIEndpoint",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -234,46 +183,13 @@ export interface BreakwaterInterface extends utils.Interface {
     functionFragment: "RECEIVED_ITEM_HASHTYPE",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "acceptOwnership",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "addSigner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getActiveSigners",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "getSeaportMetadata",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "pendingOwner",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "removeSigner",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "sip7Information",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "supportsInterface",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "updateAPIEndpoint",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -282,45 +198,17 @@ export interface BreakwaterInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "OwnershipTransferStarted(address,address)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
     "SeaportCompatibleContractDeployed()": EventFragment;
     "SignerAdded(address)": EventFragment;
     "SignerRemoved(address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferStarted"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "SeaportCompatibleContractDeployed"
   ): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SignerAdded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SignerRemoved"): EventFragment;
 }
-
-export interface OwnershipTransferStartedEventObject {
-  previousOwner: string;
-  newOwner: string;
-}
-export type OwnershipTransferStartedEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferStartedEventObject
->;
-
-export type OwnershipTransferStartedEventFilter =
-  TypedEventFilter<OwnershipTransferStartedEvent>;
-
-export interface OwnershipTransferredEventObject {
-  previousOwner: string;
-  newOwner: string;
-}
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferredEventObject
->;
-
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface SeaportCompatibleContractDeployedEventObject {}
 export type SeaportCompatibleContractDeployedEvent = TypedEvent<
@@ -380,18 +268,10 @@ export interface Breakwater extends BaseContract {
 
     RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<[string]>;
 
-    acceptOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     addSigner(
       signer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    getActiveSigners(
-      overrides?: CallOverrides
-    ): Promise<[string[]] & { signers: string[] }>;
 
     getSeaportMetadata(
       overrides?: CallOverrides
@@ -402,42 +282,8 @@ export interface Breakwater extends BaseContract {
       }
     >;
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
-    pendingOwner(overrides?: CallOverrides): Promise<[string]>;
-
     removeSigner(
       signer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    sip7Information(
-      overrides?: CallOverrides
-    ): Promise<
-      [string, string, BigNumber[], string] & {
-        domainSeparator: string;
-        apiEndpoint: string;
-        substandards: BigNumber[];
-        documentationURI: string;
-      }
-    >;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    updateAPIEndpoint(
-      newApiEndpoint: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -455,16 +301,10 @@ export interface Breakwater extends BaseContract {
 
   RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-  acceptOwnership(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   addSigner(
     signer: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  getActiveSigners(overrides?: CallOverrides): Promise<string[]>;
 
   getSeaportMetadata(
     overrides?: CallOverrides
@@ -475,42 +315,8 @@ export interface Breakwater extends BaseContract {
     }
   >;
 
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  pendingOwner(overrides?: CallOverrides): Promise<string>;
-
   removeSigner(
     signer: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  renounceOwnership(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  sip7Information(
-    overrides?: CallOverrides
-  ): Promise<
-    [string, string, BigNumber[], string] & {
-      domainSeparator: string;
-      apiEndpoint: string;
-      substandards: BigNumber[];
-      documentationURI: string;
-    }
-  >;
-
-  supportsInterface(
-    interfaceId: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  transferOwnership(
-    newOwner: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  updateAPIEndpoint(
-    newApiEndpoint: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -528,14 +334,10 @@ export interface Breakwater extends BaseContract {
 
     RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<string>;
 
-    acceptOwnership(overrides?: CallOverrides): Promise<void>;
-
     addSigner(
       signer: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    getActiveSigners(overrides?: CallOverrides): Promise<string[]>;
 
     getSeaportMetadata(
       overrides?: CallOverrides
@@ -546,40 +348,8 @@ export interface Breakwater extends BaseContract {
       }
     >;
 
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    pendingOwner(overrides?: CallOverrides): Promise<string>;
-
     removeSigner(
       signer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    sip7Information(
-      overrides?: CallOverrides
-    ): Promise<
-      [string, string, BigNumber[], string] & {
-        domainSeparator: string;
-        apiEndpoint: string;
-        substandards: BigNumber[];
-        documentationURI: string;
-      }
-    >;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    updateAPIEndpoint(
-      newApiEndpoint: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -590,24 +360,6 @@ export interface Breakwater extends BaseContract {
   };
 
   filters: {
-    "OwnershipTransferStarted(address,address)"(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnershipTransferStartedEventFilter;
-    OwnershipTransferStarted(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnershipTransferStartedEventFilter;
-
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(
-      previousOwner?: PromiseOrValue<string> | null,
-      newOwner?: PromiseOrValue<string> | null
-    ): OwnershipTransferredEventFilter;
-
     "SeaportCompatibleContractDeployed()"(): SeaportCompatibleContractDeployedEventFilter;
     SeaportCompatibleContractDeployed(): SeaportCompatibleContractDeployedEventFilter;
 
@@ -627,46 +379,15 @@ export interface Breakwater extends BaseContract {
 
     RECEIVED_ITEM_HASHTYPE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    acceptOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     addSigner(
       signer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    getActiveSigners(overrides?: CallOverrides): Promise<BigNumber>;
-
     getSeaportMetadata(overrides?: CallOverrides): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    pendingOwner(overrides?: CallOverrides): Promise<BigNumber>;
 
     removeSigner(
       signer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    sip7Information(overrides?: CallOverrides): Promise<BigNumber>;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    updateAPIEndpoint(
-      newApiEndpoint: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -693,48 +414,17 @@ export interface Breakwater extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    acceptOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     addSigner(
       signer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    getActiveSigners(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     getSeaportMetadata(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    pendingOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     removeSigner(
       signer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    sip7Information(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    supportsInterface(
-      interfaceId: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    updateAPIEndpoint(
-      newApiEndpoint: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

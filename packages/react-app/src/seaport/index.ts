@@ -1,7 +1,9 @@
 import * as Sdk from "@reservoir0x/sdk";
 import { OrderComponents } from "@reservoir0x/sdk/dist/seaport/types";
-import { BigNumber } from "ethers";
+import { BigNumber, Wallet } from "ethers";
 import { chainId } from "../eth";
+
+export const SIP6_VERSION = 0;
 
 export enum ValidationError {
   NONE,
@@ -16,6 +18,12 @@ export type HashingResult = {
   error: ValidationError;
   erroredOrderHash?: string;
 };
+
+export async function signOrder(orderData: OrderComponents, signer: Wallet) {
+  const order = new Sdk.Seaport.Order(chainId, orderData);
+  await order.sign(signer);
+  return order.params;
+}
 
 export function hashOrder(orderData: OrderComponents) {
   const order = new Sdk.Seaport.Order(chainId, orderData);

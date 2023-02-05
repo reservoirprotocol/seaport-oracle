@@ -7,6 +7,7 @@ import { latestTimestamp, wallet } from "../../src/eth";
 import handler from "../../src/pages/api/signatures";
 import * as mongo from "../../src/persistence/mongodb";
 import * as reservoir from "../../src/reservoir";
+import { SIP6_VERSION } from "../../src/seaport";
 import { EXPIRATION_IN_S } from "../../src/utils/constants";
 import { decodeExtraData } from "../utils";
 import { mockOrderSignatureRequest } from "../utils/mocks";
@@ -70,7 +71,10 @@ describe("Sign Order API", () => {
       const order = orders[0];
       const decoded = decodeExtraData(order.extraDataComponent);
 
-      const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [0, hashConsideration(consideration)]);
+      const context: BytesLike = utils.solidityPack(
+        ["bytes1", "bytes"],
+        [SIP6_VERSION, hashConsideration(consideration)],
+      );
       const signer = recoverOrderSigner(fulfiller, decoded[2], orderHash, context, decoded[3]);
 
       expect(signer).toBe(wallet.address);
@@ -102,7 +106,10 @@ describe("Sign Order API", () => {
         const orderHash = mockedOrderHashes[i];
         const consideration = substandardRequests[0].requestedReceivedItems;
         const decoded = decodeExtraData(order.extraDataComponent);
-        const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [0, hashConsideration(consideration)]);
+        const context: BytesLike = utils.solidityPack(
+          ["bytes1", "bytes"],
+          [SIP6_VERSION, hashConsideration(consideration)],
+        );
         const signer = recoverOrderSigner(fulfiller, decoded[2], orderHash, context, decoded[3]);
 
         expect(signer).toBe(wallet.address);
@@ -173,7 +180,10 @@ describe("Sign Order API", () => {
         const orderHash = mockedOrderHashes[i];
         const consideration = substandardRequests[0].requestedReceivedItems;
         const decoded = decodeExtraData(order.extraDataComponent);
-        const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [0, hashConsideration(consideration)]);
+        const context: BytesLike = utils.solidityPack(
+          ["bytes1", "bytes"],
+          [SIP6_VERSION, hashConsideration(consideration)],
+        );
         const signer = recoverOrderSigner(fulfiller, decoded[2], orderHash, context, decoded[3]);
 
         expect(signer).toBe(wallet.address);
@@ -235,7 +245,10 @@ describe("Sign Order API", () => {
         const orderHash = mockedOrderHashes[i];
         const consideration = substandardRequests[0].requestedReceivedItems;
         const decoded = decodeExtraData(order.extraDataComponent);
-        const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [0, hashConsideration(consideration)]);
+        const context: BytesLike = utils.solidityPack(
+          ["bytes1", "bytes"],
+          [SIP6_VERSION, hashConsideration(consideration)],
+        );
         const signer = recoverOrderSigner(fulfiller, decoded[2], orderHash, context, decoded[3]);
 
         expect(signer).toBe(wallet.address);
@@ -286,7 +299,10 @@ describe("Sign Order API", () => {
       const orderHash = mockedOrderHashes[0];
       const consideration = substandardRequests[0].requestedReceivedItems;
       const decoded = decodeExtraData(order.extraDataComponent);
-      const context: BytesLike = utils.solidityPack(["bytes1", "bytes"], [0, hashConsideration(consideration)]);
+      const context: BytesLike = utils.solidityPack(
+        ["bytes1", "bytes"],
+        [SIP6_VERSION, hashConsideration(consideration)],
+      );
       const signer = recoverOrderSigner(fulfiller, decoded[2], orderHash, context, decoded[3]);
 
       expect(signer).toBe(wallet.address);

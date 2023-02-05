@@ -1,7 +1,7 @@
 import { CONTRACT_ADDRESSES } from "../utils/contracts";
 
 export const EIP712_DOMAIN = (chainId: number) => ({
-  name: "Breakwater",
+  name: "SignedZone",
   version: "1.0.0",
   chainId,
   verifyingContract: CONTRACT_ADDRESSES[chainId].breakwaterZone,

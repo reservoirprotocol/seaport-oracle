@@ -85,12 +85,13 @@ export async function findCancellations(limit: number, currentTimestamp: number,
 }
 
 export async function trackSignature(signatureInfo: SignatureInfo) {
+  const expirationInMillis = signatureInfo.expiration * 1000;
   const { db } = await connectToDatabase();
   const collection = db.collection<SignatureInfo>("signatures");
   await collection.updateOne(
     { orderHash: signatureInfo.orderHash },
     // expireAt is used to support a TTL index
-    { $set: { expiration: signatureInfo.expiration, expireAt: new Date(signatureInfo.expiration) } },
+    { $set: { expiration: expirationInMillis, expireAt: new Date(expirationInMillis) } },
     { upsert: true },
   );
 }

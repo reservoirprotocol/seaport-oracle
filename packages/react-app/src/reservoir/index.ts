@@ -6,7 +6,7 @@ type OrdersQuery = paths["/tokens/v5"]["get"]["parameters"]["query"];
 
 export async function fetchFlagged(tokensIds: string[]): Promise<Set<string>> {
   const defaultOptions = { limit: 50 };
-  const url = new URL(`https://${reservoirHost}.reservoir.tools/orders/tokens/v5`);
+  const url = new URL(`https://${reservoirHost}.reservoir.tools/tokens/v5`);
   let query: OrdersQuery = { tokens: tokensIds, ...defaultOptions };
   setParams(url, query);
 
