@@ -77,6 +77,7 @@ export async function findCancellations(limit: number, currentTimestamp: number,
   const collection = db.collection<OrderCancellation>("cancellations");
   let query;
   if (fromTimestamp) {
+    // we use strict ordering functions so that the query is stable even when we append future cancellations
     query = collection.find({ timestamp: { $gt: fromTimestamp, $lt: currentTimestamp } });
   } else {
     query = collection.find({});
@@ -85,6 +86,7 @@ export async function findCancellations(limit: number, currentTimestamp: number,
 }
 
 export async function trackSignature(signatureInfo: SignatureInfo) {
+  // Signature expirations are based on block timestamps so they are in seconds
   const expirationInMillis = signatureInfo.expiration * 1000;
   const { db } = await connectToDatabase();
   const collection = db.collection<SignatureInfo>("signatures");

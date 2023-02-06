@@ -62,7 +62,7 @@ describe("Sign Order API", () => {
         method: "POST",
         body: { orders: mockedOrders },
       });
-
+      now = await latestTimestamp(); //Refresh value to avoid intermittent failures
       await handler(req, res);
 
       expect(res._getStatusCode()).toBe(200);
@@ -79,6 +79,8 @@ describe("Sign Order API", () => {
 
       expect(signer).toBe(wallet.address);
       expect(mockedIsCancelled).toHaveBeenCalledWith(orderHash);
+      console.log(now);
+
       expect(mockedTrackSignature).toHaveBeenCalledWith({ orderHash, expiration: now + EXPIRATION_IN_S });
     });
 

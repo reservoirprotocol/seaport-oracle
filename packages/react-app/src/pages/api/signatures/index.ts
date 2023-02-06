@@ -120,7 +120,7 @@ async function encodeExtraData(
   consideration: ReceivedItem[],
 ) {
   const contextPayload = hashConsideration(consideration);
-  const context: BytesLike = encodeContext(0, contextPayload);
+  const context: BytesLike = encodeContext(SIP6_VERSION, contextPayload);
   const signature = await signOrder(fulfiller, expiration, orderHash, context);
   const extraData = utils.solidityPack(
     ["bytes1", "address", "uint64", "bytes", "bytes"],

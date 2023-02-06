@@ -128,24 +128,28 @@ describe("MongoDb", () => {
       const { db } = await connectToDatabase();
       const collection = db.collection("signatures");
       await collection.insertOne(signatureInfo);
-      signatureInfo.expiration = Date.now() + 1000;
+      // Signatures expirations are second based
+      signatureInfo.expiration = (Date.now() + 1000) / 1000;
       await trackSignature(signatureInfo);
       const result = await collection.findOne({ orderHash: "abc" });
-      expect(result).toEqual({
-        ...signatureInfo,
-        expireAt: new Date(signatureInfo.expiration),
+      expect({ ...result, _id: undefined }).toEqual({
+        orderHash: signatureInfo.orderHash,
+        expiration: signatureInfo.expiration * 1000,
+        expireAt: new Date(signatureInfo.expiration * 1000),
       });
     });
 
     it("should insert a new signature if it does not exist", async () => {
-      const signatureInfo = { orderHash: "abc", expiration: Date.now() };
+      // Signatures expirations are second based
+      const signatureInfo = { orderHash: "abc", expiration: Date.now() / 1000 };
       const { db } = await connectToDatabase();
       const collection = db.collection("signatures");
       await trackSignature(signatureInfo);
       const result = await collection.findOne({ orderHash: "abc" });
       expect({ ...result, _id: undefined }).toEqual({
-        ...signatureInfo,
-        expireAt: new Date(signatureInfo.expiration),
+        orderHash: signatureInfo.orderHash,
+        expiration: signatureInfo.expiration * 1000,
+        expireAt: new Date(signatureInfo.expiration * 1000),
       });
     });
   });
