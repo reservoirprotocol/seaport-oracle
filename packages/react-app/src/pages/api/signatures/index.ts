@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import { hashConsideration, signOrder } from "../../../eip712";
 import { convertSignatureToEIP2098, latestTimestamp } from "../../../eth";
-import { Features } from "../../../features/Features";
+import { Features } from "../../../features/features";
 import { FlaggingChecker } from "../../../features/flagging/FlaggingChecker";
 import { isCancelled, trackSignature } from "../../../persistence/mongodb";
 import { hashOrder, SIP6_VERSION } from "../../../seaport";

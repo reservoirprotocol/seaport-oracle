@@ -1,14 +1,14 @@
 FROM node:18.5-slim as dependencies
-WORKDIR /cancelx
+WORKDIR /seaport-oracle
 COPY ./package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/ ./.yarn/
 RUN yarn install
 
 FROM node:18.5-slim as builder
-WORKDIR /cancelx
+WORKDIR /seaport-oracle
 COPY . .
-COPY --from=dependencies /cancelx/node_modules ./node_modules
-WORKDIR /cancelx/packages/react-app
+COPY --from=dependencies /seaport-oracle/node_modules ./node_modules
+WORKDIR /seaport-oracle/packages/react-app
 RUN "../../node_modules/.bin/next" build
 
 EXPOSE 3000
