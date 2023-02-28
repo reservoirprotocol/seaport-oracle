@@ -2,7 +2,7 @@ import { ItemType, OrderType } from "@reservoir0x/sdk/dist/seaport/types";
 import { EnumLike, z } from "zod";
 const ethAddressRE = /(^0x[A-Fa-f0-9]{40}$)/g;
 const uint256HexRE = /(^0x[A-Fa-f0-9]{1,64}$)/g;
-const uint256DecimalRE = /(^[0-9]{1,76}$)/g;
+const uint256DecimalRE = /(^[0-9]{1,78}$)/g;
 const bytes32RE = /(^0x[A-Fa-f0-9]{64}$)/g;
 const ethAddress = z.string().regex(ethAddressRE);
 const uint256 = z.string().regex(uint256HexRE).or(z.string().regex(uint256DecimalRE));
