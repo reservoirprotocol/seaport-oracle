@@ -4,7 +4,7 @@ export const EIP712_DOMAIN = (chainId: number) => ({
   name: "SignedZone",
   version: "1.0.0",
   chainId,
-  verifyingContract: CONTRACT_ADDRESSES[chainId].breakwaterZone,
+  verifyingContract: CONTRACT_ADDRESSES[chainId].cancellationZone,
 });
 
 export const CANCEL_REQUEST_EIP712_TYPE = {
