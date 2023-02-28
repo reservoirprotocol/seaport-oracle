@@ -167,14 +167,14 @@ describe("Cancellation API", () => {
         const orderHashes: string[] = [];
         let orderData = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData.offerer = user1.address;
-        let order = new Sdk.Seaport.Order(chainId, orderData);
+        let order = new Sdk.SeaportV14.Order(chainId, orderData);
         await order.sign(user1);
         let orderHash = await order.hash();
         orderHashes.push(orderHash);
         orders.push(order.params);
         orderData = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData.offerer = user2.address;
-        order = new Sdk.Seaport.Order(chainId, orderData);
+        order = new Sdk.SeaportV14.Order(chainId, orderData);
         await order.sign(user2);
         orderHash = await order.hash();
         orderHashes.push(orderHash);

@@ -21,7 +21,7 @@ export async function mockOrders(user: Wallet, numberOfOrders: number): Promise<
   for (let i = 0; i < numberOfOrders; i++) {
     const orderData = generateMock(SEAPORT_ORDER_SCHEMA);
     orderData.offerer = user.address;
-    const order = new Sdk.Seaport.Order(chainId, orderData);
+    const order = new Sdk.SeaportV14.Order(chainId, orderData);
     await order.sign(user);
     const orderHash = await order.hash();
     orderHashes.push(orderHash);
@@ -52,7 +52,7 @@ export async function mockOrderSignatureRequest(
       }),
     );
     orders.push(order);
-    orderHashes.push(new Sdk.Seaport.Order(chainId, order.orderParameters).hash());
+    orderHashes.push(new Sdk.SeaportV14.Order(chainId, order.orderParameters).hash());
   }
 
   return [orders, orderHashes];
@@ -67,7 +67,7 @@ export async function mockReplacementOrders(user: Wallet, salts: string[]): Prom
     if (salts[i]) {
       orderData.salt = salts[i];
     }
-    const order = new Sdk.Seaport.Order(chainId, orderData);
+    const order = new Sdk.SeaportV14.Order(chainId, orderData);
     await order.sign(user);
     orders.push(order.params);
   }

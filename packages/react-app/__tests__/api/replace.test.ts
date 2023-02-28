@@ -205,7 +205,7 @@ describe("Replacement API", () => {
         let orderData = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData.offerer = user1.address;
         orderData.salt = "0";
-        let order = new Sdk.Seaport.Order(chainId, orderData);
+        let order = new Sdk.SeaportV14.Order(chainId, orderData);
         await order.sign(user1);
         orders.push(order.params);
 
@@ -222,12 +222,12 @@ describe("Replacement API", () => {
         const orders = [];
         let orderData = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData.offerer = user1.address;
-        let order = new Sdk.Seaport.Order(chainId, orderData);
+        let order = new Sdk.SeaportV14.Order(chainId, orderData);
         await order.sign(user1);
         orders.push(order.params);
         let orderData2 = generateMock(SEAPORT_ORDER_SCHEMA);
         orderData2.offerer = user1.address;
-        let order2 = new Sdk.Seaport.Order(chainId, orderData2);
+        let order2 = new Sdk.SeaportV14.Order(chainId, orderData2);
         await order2.sign(user2);
         orders.push(order2.params);
 

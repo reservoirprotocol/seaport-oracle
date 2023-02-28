@@ -20,13 +20,13 @@ export type HashingResult = {
 };
 
 export async function signOrder(orderData: OrderComponents, signer: Wallet) {
-  const order = new Sdk.Seaport.Order(chainId, orderData);
+  const order = new Sdk.SeaportV14.Order(chainId, orderData);
   await order.sign(signer);
   return order.params;
 }
 
 export function hashOrder(orderData: OrderComponents) {
-  const order = new Sdk.Seaport.Order(chainId, orderData);
+  const order = new Sdk.SeaportV14.Order(chainId, orderData);
   return order.hash();
 }
 
@@ -35,7 +35,7 @@ export async function hashOrders(orders: OrderComponents[]): Promise<HashingResu
   const orderHashes = [];
   for (let i = 0; i < orders.length; i++) {
     const orderData = orders[i];
-    const order = new Sdk.Seaport.Order(chainId, orderData);
+    const order = new Sdk.SeaportV14.Order(chainId, orderData);
     const orderHash = order.hash();
     try {
       await order.checkSignature();
@@ -69,7 +69,7 @@ export async function getReplacedOrderHashes(
 
   for (let i = 0; i < newOrders.length; i++) {
     const orderData = newOrders[i];
-    const order = new Sdk.Seaport.Order(chainId, orderData);
+    const order = new Sdk.SeaportV14.Order(chainId, orderData);
     try {
       await order.checkSignature();
     } catch (e) {
