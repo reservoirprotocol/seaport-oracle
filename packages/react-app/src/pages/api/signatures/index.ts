@@ -1,4 +1,4 @@
-import { ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
+import { ReceivedItem } from "@reservoir0x/sdk/dist/seaport-v1.4/types";
 import { utils } from "ethers";
 import { BytesLike } from "ethers/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";

@@ -10,7 +10,7 @@ const bytes32 = z.string().regex(bytes32RE);
 const solidityEnum = (e: EnumLike) => z.number().max(Object.keys(e).length - 1);
 
 export const SEAPORT_ORDER_SCHEMA = z.object({
-  kind: z.enum(["contract-wide", "single-token", "token-list", "bundle-ask"]),
+  kind: z.enum(["contract-wide", "single-token", "token-list"]),
   offerer: ethAddress,
   zone: ethAddress,
   offer: z.array(
