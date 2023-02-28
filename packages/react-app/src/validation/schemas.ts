@@ -65,7 +65,7 @@ export const SUBSTANDARD_3_REQUEST = z.object({
 });
 
 export const ORDER_SIGNATURE_REQUEST_ITEM = z.object({
-  chainId: z.string(),
+  chainId: z.string().or(z.number()),
   fulfiller: ethAddress,
   marketplaceContract: ethAddress,
   orderParameters: SEAPORT_ORDER_SCHEMA,
