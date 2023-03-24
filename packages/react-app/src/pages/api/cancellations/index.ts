@@ -1,11 +1,13 @@
 import { utils } from "ethers";
 import { NextApiRequest, NextApiResponse } from "next";
 import { recoverCancelRequestSigner } from "../../../eip712";
+import { chainId } from "../../../eth";
 import { cancelOrder } from "../../../features/cancellation";
 import { findCancellations } from "../../../persistence/mongodb";
 import { hashOrders, ValidationError } from "../../../seaport";
 import { ApiError, OrderCancellations } from "../../../types/types";
 import { MAX_RETURNED_CANCELLATIONS } from "../../../utils/constants";
+import { CONTRACT_ADDRESSES } from "../../../utils/contracts";
 import { createLogger } from "../../../utils/logger";
 import { getTimestamp } from "../../../utils/time";
 import {
@@ -59,7 +61,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(400).json(ILLEGAL_ARGUMENT_ERROR(`Body could not be parsed`));
       return;
     }
+
     const orders = data.orders;
+    if (orders.some(order => order.zone !== CONTRACT_ADDRESSES[chainId].cancellationZone)) {
+      res.status(401).json(UNAUTHORIZED_ERROR);
+      return;
+    }
 
     const { orderHashes, orderSigner, error, erroredOrderHash } = await hashOrders(orders);
 
