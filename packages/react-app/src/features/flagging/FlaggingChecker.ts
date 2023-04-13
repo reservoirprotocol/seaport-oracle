@@ -1,4 +1,4 @@
-import { ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
+import { ReceivedItem } from "@reservoir0x/sdk/dist/seaport-base/types";
 import { fetchFlagged } from "../../reservoir";
 
 export class FlaggingChecker {

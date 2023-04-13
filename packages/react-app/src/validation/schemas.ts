@@ -1,4 +1,4 @@
-import { ItemType, OrderType } from "@reservoir0x/sdk/dist/seaport/types";
+import { ItemType, OrderType } from "@reservoir0x/sdk/dist/seaport-base/types";
 import { EnumLike, z } from "zod";
 const ethAddressRE = /(^0x[A-Fa-f0-9]{40}$)/g;
 const uint256HexRE = /(^0x[A-Fa-f0-9]{1,64}$)/g;

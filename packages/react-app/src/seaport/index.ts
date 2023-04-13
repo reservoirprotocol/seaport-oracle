@@ -1,5 +1,5 @@
 import * as Sdk from "@reservoir0x/sdk";
-import { OrderComponents } from "@reservoir0x/sdk/dist/seaport-v1.4/types";
+import { OrderComponents } from "@reservoir0x/sdk/dist/seaport-base/types";
 import { BigNumber, Wallet } from "ethers";
 import { chainId } from "../eth";
 

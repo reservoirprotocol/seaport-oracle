@@ -1,4 +1,4 @@
-import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
+import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport-base/types";
 import { BytesLike } from "ethers";
 
 export type SignedOrder = {

@@ -1,4 +1,4 @@
-import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport/types";
+import { OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport-base/types";
 import { BigNumberish, BytesLike, Wallet } from "ethers";
 import { verifyTypedData, _TypedDataEncoder } from "ethers/lib/utils";
 import { chainId, wallet } from "../eth";
