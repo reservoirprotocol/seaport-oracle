@@ -68,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       return;
     }
 
-    const { orderHashes, orderSigner, error, erroredOrderHash } = await hashOrders(orders);
+    const { orderHashes, orderSigner, error, erroredOrderHash } = await hashOrders(orders, data.orderKind);
 
     if (error != ValidationError.NONE) {
       res.status(400).json(ILLEGAL_ARGUMENT_ERROR(ORDER_HASHING_ERROR_MESSAGE(error, erroredOrderHash)));

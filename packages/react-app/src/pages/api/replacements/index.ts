@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       res.status(400).json(ILLEGAL_ARGUMENT_ERROR(`Body could not be parsed`));
       return;
     }
-    const { newOrders, replacedOrders } = data;
+    const { newOrders, replacedOrders, orderKind } = data;
 
     if (newOrders.length !== replacedOrders.length) {
       LOGGER.error(`Number of orders do not match`);
@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       orderSigner,
       error,
       erroredOrderHash,
-    } = await getReplacedOrderHashes(replacedOrders, newOrders);
+    } = await getReplacedOrderHashes(replacedOrders, newOrders, orderKind);
 
     if (error != ValidationError.NONE) {
       LOGGER.error(`Validation Error: ${error}`);
