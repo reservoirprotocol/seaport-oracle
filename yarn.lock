@@ -4222,7 +4222,7 @@ __metadata:
     "@fontsource/source-serif-pro": ^4.5.0
     "@project/contracts": ^1.0.0
     "@reservoir0x/reservoir-kit-client": ^0.2.5
-    "@reservoir0x/sdk": ^0.0.329
+    "@reservoir0x/sdk": ^0.0.331
     "@testing-library/jest-dom": ^5.16.1
     "@testing-library/react": ^12.1.2
     "@types/color": ^3.0.2
@@ -4322,14 +4322,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reservoir0x/sdk@npm:^0.0.329":
-  version: 0.0.329
-  resolution: "@reservoir0x/sdk@npm:0.0.329"
+"@reservoir0x/sdk@npm:^0.0.331":
+  version: 0.0.331
+  resolution: "@reservoir0x/sdk@npm:0.0.331"
   dependencies:
     "@uniswap/smart-order-router": ^3.0.4
     ethers: ^5.7.2
     merkletreejs: ^0.3.9
-  checksum: 67832adc6f76fc3e8ea2ea143a8e0c93e769b5b8b4fbf585034ac471184395d012fb59a0a784fe7d0b3dccc415dd313c74d708a5881e28651e4f5af5cd79be5a
+  checksum: 0438afed77dd1189b324384ff11301feae0d6e7e689da3c3dc22abf04c1297a63d2d6542ea92f1d8e4f38d585fbd0f230b8cb0be3c6861f343d9639749bd9967
   languageName: node
   linkType: hard
 
