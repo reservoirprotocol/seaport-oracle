@@ -1,5 +1,5 @@
 import { generateMock } from "@anatine/zod-mock";
-import { ConsiderationItem, OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport-v1.4/types";
+import { ConsiderationItem, OrderComponents, ReceivedItem } from "@reservoir0x/sdk/dist/seaport-base/types";
 import { BigNumber, constants, utils, Wallet } from "ethers";
 import { chainId } from "../../src/eth";
 import { ORDER_SIGNATURE_REQUEST_ITEM, RECEIVED_ITEM, SEAPORT_ORDER_SCHEMA } from "../../src/validation/schemas";

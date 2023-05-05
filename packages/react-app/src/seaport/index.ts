@@ -30,8 +30,10 @@ export function hashOrder(orderData: OrderComponents) {
   return order.hash();
 }
 
-
-export async function hashOrders(orders: OrderComponents[], orderKind: "seaport-v1.4" | "alienswap"): Promise<HashingResult> {
+export async function hashOrders(
+  orders: OrderComponents[],
+  orderKind: "seaport-v1.4" | "seaport-v1.5" | "alienswap",
+): Promise<HashingResult> {
   let orderSigner: string = "";
   const orderHashes = [];
   for (let i = 0; i < orders.length; i++) {
@@ -58,7 +60,7 @@ export async function hashOrders(orders: OrderComponents[], orderKind: "seaport-
 export async function getReplacedOrderHashes(
   replacedOrders: OrderComponents[],
   newOrders: OrderComponents[],
-  orderKind: "seaport-v1.4" | "alienswap",
+  orderKind: "seaport-v1.4" | "seaport-v1.5" | "alienswap",
 ): Promise<HashingResult> {
   const result = await hashOrders(replacedOrders, orderKind);
   const { orderHashes, orderSigner, error } = result;
@@ -96,10 +98,16 @@ export async function getReplacedOrderHashes(
   return { orderHashes: salts, orderSigner, error: ValidationError.NONE };
 }
 
-function createOrder(chainId: number, orderData: OrderComponents, orderKind: "seaport-v1.4" | "alienswap"): Sdk.SeaportV14.Order | Sdk.Alienswap.Order {
+function createOrder(
+  chainId: number,
+  orderData: OrderComponents,
+  orderKind: "seaport-v1.4" | "seaport-v1.5" | "alienswap",
+): Sdk.SeaportV14.Order | Sdk.SeaportV15.Order | Sdk.Alienswap.Order {
   if (orderKind === "alienswap") {
     return new Sdk.Alienswap.Order(chainId, orderData);
-  } else {
+  } else if (orderKind === "seaport-v1.4") {
     return new Sdk.SeaportV14.Order(chainId, orderData);
+  } else {
+    return new Sdk.SeaportV15.Order(chainId, orderData);
   }
 }
