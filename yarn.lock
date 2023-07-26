@@ -4222,7 +4222,7 @@ __metadata:
     "@fontsource/source-serif-pro": ^4.5.0
     "@project/contracts": ^1.0.0
     "@reservoir0x/reservoir-kit-client": ^0.2.5
-    "@reservoir0x/sdk": ^0.0.333
+    "@reservoir0x/sdk": ^0.0.337
     "@testing-library/jest-dom": ^5.16.1
     "@testing-library/react": ^12.1.2
     "@types/color": ^3.0.2
@@ -4322,14 +4322,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reservoir0x/sdk@npm:^0.0.333":
-  version: 0.0.333
-  resolution: "@reservoir0x/sdk@npm:0.0.333"
+"@reservoir0x/sdk@npm:^0.0.337":
+  version: 0.0.337
+  resolution: "@reservoir0x/sdk@npm:0.0.337"
   dependencies:
     "@uniswap/smart-order-router": ^3.0.4
     ethers: ^5.7.2
+    fummpel: ^0.0.4
     merkletreejs: ^0.3.9
-  checksum: d291a4b68cf17d31834b91fa66757b6eaf21fafa3ef975c7b6359da53cf9694a000b8d5fa0b1ceb17c061e341d555181c5445b5d5d7f1e4b5aefe8be335a8a90
+  checksum: 3d3441db42a7ed7c1403e3e137de82f8c214ed24276e20f38408645ec6c08c856639af63cb103de2068e1f5bd3c22f3b7092ff4b3df2a79cffef2314520fbf96
   languageName: node
   linkType: hard
 
@@ -12262,6 +12263,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fummpel@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "fummpel@npm:0.0.4"
+  dependencies:
+    hash-wasm: ^4.9.0
+  checksum: f4a7b8daac30128c98e4745f629f944ac7471b28b31ba0a425a47f112009bacabbe17ae5cb9708f1f268791bd0ba77f96c9cccf5a493e7a13ecf9e63bf61f2d6
+  languageName: node
+  linkType: hard
+
 "function-bind@npm:^1.1.1":
   version: 1.1.1
   resolution: "function-bind@npm:1.1.1"
@@ -13039,6 +13049,13 @@ __metadata:
     readable-stream: ^3.6.0
     safe-buffer: ^5.2.0
   checksum: 26b7e97ac3de13cb23fc3145e7e3450b0530274a9562144fc2bf5c1e2983afd0e09ed7cc3b20974ba66039fad316db463da80eb452e7373e780cbee9a0d2f2dc
+  languageName: node
+  linkType: hard
+
+"hash-wasm@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "hash-wasm@npm:4.9.0"
+  checksum: b8734247fb7f69941f6564179dd891b7de21aa5877b9e32a5c6d777c2ab45cf5a6b021ade2b0156ec780ac41188486d571d9d526ef8206dda1ad306c81112a8a
   languageName: node
   linkType: hard
 
